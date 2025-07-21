@@ -1,5 +1,4 @@
 // src/components/ContactInfo.tsx
-import React from 'react';
 import { Box, Typography, Divider, Stack, Link } from '@mui/material';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';

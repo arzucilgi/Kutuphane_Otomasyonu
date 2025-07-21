@@ -21,12 +21,18 @@ import Logo from '../../assets/kütüphane.png';
 interface CustomAppBarProps {
   activeSection: string;
 }
+type MenuItem = {
+  label: string;
+  sectionId?: string | undefined;
+  path?: string | undefined;
+};
 
-const menuItems = [
-  { label: 'Anasayfa', path: '/', sectionId: 'home' },
-  { label: 'Hakkımızda', path: '/about', sectionId: 'about' },
-  { label: 'İletişim', path: '/contact', sectionId: 'contact' },
+const menuItems:MenuItem[] = [
+  { label: 'Anasayfa', sectionId: 'home' },
+  { label: 'Hakkımızda', sectionId:  'about' },
+  { label: 'İletişim', sectionId: 'contact' },
   { label: 'Giriş', path: '/login' }, // login için sectionId yok çünkü ayrı sayfa olabilir
+  { label: 'Kayıt Ol', path: '/register' }
 ];
 
 const CustomAppBar: React.FC<CustomAppBarProps> = ({ activeSection }) => {
@@ -37,10 +43,17 @@ const CustomAppBar: React.FC<CustomAppBarProps> = ({ activeSection }) => {
 
   const toggleDrawer = (open: boolean) => () => setDrawerOpen(open);
 
-  const handleMenuClick = (path: string) => {
-    navigate(path);
-    setDrawerOpen(false);
-  };
+const handleMenuClick = (item: MenuItem) => {
+  if (item.path) {
+    navigate(item.path);
+  } else if (item.sectionId) {
+    const sectionElement = document.getElementById(item.sectionId);
+    if (sectionElement) {
+      sectionElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+  setDrawerOpen(false);
+};
 
   return (
     <AppBar
@@ -103,7 +116,7 @@ const CustomAppBar: React.FC<CustomAppBarProps> = ({ activeSection }) => {
               return (
                 <Typography
                   key={item.label}
-                  onClick={() => handleMenuClick(item.path)}
+                  onClick={() => handleMenuClick(item)}
                   sx={{
                     cursor: 'pointer',
                     fontSize: '1.15rem',
@@ -148,7 +161,7 @@ const CustomAppBar: React.FC<CustomAppBarProps> = ({ activeSection }) => {
                       <>
                         <ListItem
                           key={item.label}
-                          onClick={() => handleMenuClick(item.path)}
+                          onClick={() => handleMenuClick(item)}
                           sx={{
                             py: 2,
                             backgroundColor: isActive ? '#e3f2fd' : 'transparent',
