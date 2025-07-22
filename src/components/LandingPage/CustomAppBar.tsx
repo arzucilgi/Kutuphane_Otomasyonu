@@ -45,7 +45,7 @@ const CustomAppBar: React.FC<CustomAppBarProps> = ({ activeSection }) => {
 
 const handleMenuClick = (item: MenuItem) => {
   if (item.path) {
-    navigate(item.path);
+    navigate(item.path ,{ replace: true }   );
   } else if (item.sectionId) {
     const sectionElement = document.getElementById(item.sectionId);
     if (sectionElement) {

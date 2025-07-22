@@ -41,7 +41,7 @@ const Register = () => {
       options: {
         data: {
           ad_soyad: formData.ad_soyad,
-          rol: 'kullanici',
+          rol: 'ogrenci',
         },
       },
     });
@@ -61,7 +61,7 @@ const Register = () => {
             id: data.user.id,  // uuid user id olarak
             ad_soyad: formData.ad_soyad,
             eposta: formData.email,
-            rol: 'kullanici',
+            rol: 'ogrenci',
           },
         ]);
 
@@ -75,7 +75,7 @@ const Register = () => {
       setLoading(false);
 
       setTimeout(() => {
-        navigate('/login');
+        navigate('/login' );
       }, 2000);
     }
   };

@@ -1,9 +1,18 @@
-import React from 'react'
+// src/layouts/StudentDashboard.tsx
 
-function Dashboard() {
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import StudentNavbar from '../components/StudentDashboard/StudentNavbar ';
+
+const StudentDashboard = () => {
   return (
-    <div>Dashboard</div>
-  )
-}
+    <div>
+      <StudentNavbar />
+      <div style={{ padding: 20 }}>
+        <Outlet /> {/* Alt sayfalar buraya render edilir */}
+      </div>
+    </div>
+  );
+};
 
-export default Dashboard
+export default StudentDashboard;

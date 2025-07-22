@@ -65,8 +65,8 @@ const LoginPage = () => {
     // Rol bazlı yönlendirme
     setTimeout(() => {
       switch (userRole) {
-        case 'kullanici':
-          navigate('/dashboard');
+        case 'ogrenci':
+          navigate('/studentDashboard',{ replace: true });
           break;
         case 'memur':
           navigate('/dashboard/memur');
