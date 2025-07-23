@@ -1,17 +1,30 @@
-// src/layouts/StudentDashboard.tsx
-
-import React from 'react';
-import { Outlet } from 'react-router-dom';
-import StudentNavbar from '../components/StudentDashboard/StudentNavbar ';
+import React from "react";
+import { Outlet } from "react-router-dom";
+import StudentNavbar from "../components/StudentDashboard/StudentNavbar ";
+import { Box } from "@mui/material";
 
 const StudentDashboard = () => {
   return (
-    <div>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        maxHeight: "100%",
+        // height: "100vh", // Tüm ekran yüksekliği
+        overflowY: "hidden",
+      }}
+    >
       <StudentNavbar />
-      <div style={{ padding: 20 }}>
-        <Outlet /> {/* Alt sayfalar buraya render edilir */}
-      </div>
-    </div>
+      <Box
+        sx={{
+          flex: 1, // Navbar dışındaki alanı kapla
+          overflowY: "auto", // Scroll burada olsun
+          px: 2,
+        }}
+      >
+        <Outlet /> {/* Burada Books render olacak */}
+      </Box>
+    </Box>
   );
 };
 
