@@ -4,7 +4,7 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import StudentDashboard from "./pages/StudentDashboard";
-import StudentProfile from "./components/StudentDashboard/StudentProfile";
+import StudentProfile from "./components/StudentDashboard/StudentProfile/StudentProfile";
 import { Book } from "@mui/icons-material";
 import Books from "./components/StudentDashboard/Books";
 import BooksStudentReads from "./components/StudentDashboard/BooksStudentReads";
@@ -32,6 +32,7 @@ function App() {
             </ProtectedRoute>
           }
         >
+          <Route index element={<StudentProfile />} />
           <Route path="profile" element={<StudentProfile />} />
           <Route path="books" element={<Books />} />
           <Route path="readBooks" element={<BooksStudentReads />} />

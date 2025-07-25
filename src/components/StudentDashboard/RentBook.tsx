@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -7,9 +7,9 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { supabase } from "../../lib/supabaseClient";
-import { rentBook } from "../../services/RentBookService";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { rentBookIfAllowed } from "../../services/RentCheckService";
 
 const RentBookPage: React.FC = () => {
   const navigate = useNavigate();
@@ -19,6 +19,7 @@ const RentBookPage: React.FC = () => {
   const [book] = useState<any>(kitapFromState);
   const [days, setDays] = useState<number>(7);
   const [renting, setRenting] = useState(false);
+  const [overLimit, setOverLimit] = useState(false);
 
   const today = new Date();
   const returnDate = new Date(today);
@@ -27,34 +28,26 @@ const RentBookPage: React.FC = () => {
   const handleRent = async () => {
     if (!book || book.stok_adedi <= 0) return;
     setRenting(true);
+
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error("Kullanıcı bulunamadı");
 
-      await rentBook(user.id, book.id, returnDate);
-      toast.success("Kitap başarıyla ödünç alındı.");
-      navigate("/studentDashboard/books");
+      const result = await rentBookIfAllowed(user.id, book.id, returnDate);
+
+      if (result.success) {
+        toast.success(result.message);
+        navigate("/studentDashboard/books");
+      } else {
+        toast.warning(result.message);
+      }
     } catch (error: any) {
-      alert("Hata: " + error.message);
-      toast.error("Kiralama hatası:", error);
+      console.error("Hata:", error.message);
+      toast.error("Kiralama hatası: " + error.message);
     }
+
     setRenting(false);
   };
-
-  if (!book) {
-    return (
-      <Box
-        sx={{
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Typography>Kitap bilgisi bulunamadı.</Typography>
-      </Box>
-    );
-  }
 
   return (
     <Box
@@ -156,7 +149,7 @@ const RentBookPage: React.FC = () => {
             variant="contained"
             color="primary"
             disabled={book.stok_adedi <= 0 || renting}
-            onClick={handleRent}
+            onClick={handleRent} // burası
           >
             {renting ? "İşleniyor..." : "Ödünç Al"}
           </Button>

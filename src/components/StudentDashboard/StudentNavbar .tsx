@@ -109,7 +109,8 @@ const StudentNavbar = () => {
                           transform: "scale(1.05)",
                           boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
                           cursor: "pointer",
-                          backgroundColor: "#69969cff",
+                          backgroundColor: "#c5cacaff",
+                          color: "whitesmoke",
                         },
                       }}
                     >

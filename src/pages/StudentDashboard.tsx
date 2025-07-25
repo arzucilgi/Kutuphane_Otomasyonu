@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import StudentNavbar from "../components/StudentDashboard/StudentNavbar ";
 import { Box } from "@mui/material";
+import StudentProfile from "../components/StudentDashboard/StudentProfile/StudentProfile";
 
 const StudentDashboard = () => {
   return (
@@ -15,6 +16,7 @@ const StudentDashboard = () => {
       }}
     >
       <StudentNavbar />
+      {/* <StudentProfile /> */}
       <Box
         sx={{
           flex: 1, // Navbar dışındaki alanı kapla

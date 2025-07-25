@@ -15,6 +15,8 @@ import {
   Button,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { styled } from "@mui/system";
 
 import {
@@ -23,7 +25,7 @@ import {
   fetchYazarlar,
   fetchYayinevleri,
   fetchKitaplar,
-} from "../../services/bookService"; // Yeni servislerin yolu
+} from "../../services/bookService";
 
 import {
   type Tur,
@@ -33,13 +35,63 @@ import {
   type Kitap,
 } from "../../services/bookTypeService";
 import { useNavigate } from "react-router-dom";
+import {
+  toggleFavoriteBook,
+  fetchUserFavorites,
+} from "../../services/FavoriteService";
+import { supabase } from "../../lib/supabaseClient";
 
+// Stil tanımlamaları
 const StyledCard = styled(Card)({
   height: 300,
   width: 350,
   display: "flex",
-  flexDirection: "row",
   cursor: "pointer",
+  position: "relative",
+  borderRadius: 12,
+  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+  transition: "transform 0.2s, box-shadow 0.2s",
+  "&:hover": {
+    transform: "translateY(-5px)",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
+  },
+});
+
+const CoverWrapper = styled("div")({
+  position: "relative",
+  width: "70%",
+  height: "100%",
+  overflow: "hidden",
+  borderTopLeftRadius: 12,
+  borderBottomLeftRadius: 12,
+});
+
+const CoverImage = styled("img")({
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  display: "block",
+});
+
+const ContentWrapper = styled(CardContent)({
+  width: "55%",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  padding: "16px 20px",
+  gap: "8px",
+  overflow: "hidden",
+});
+
+const FavoriteButton = styled(IconButton)({
+  position: "absolute",
+  top: 8,
+  right: 8,
+  zIndex: 10,
+  backgroundColor: "rgba(247, 247, 247, 0.85)",
+  "&:hover": {
+    backgroundColor: "rgba(234, 234, 234, 1)",
+  },
 });
 
 function Books() {
@@ -53,12 +105,66 @@ function Books() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedKitap, setSelectedKitap] = useState<Kitap | null>(null);
+  const [userFavorites, setUserFavorites] = useState<string[]>([]); // favori kitap id'leri
 
   const navigate = useNavigate();
 
   // Pagination state
   const [page, setPage] = useState(1);
   const itemsPerPage = 8;
+
+  // Kullanıcıyı al ve favorilerini getir
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error || !user) {
+        setUserFavorites([]);
+        return;
+      }
+
+      try {
+        const favs = await fetchUserFavorites(user.id);
+        setUserFavorites(favs); // Zaten string[] dönüyor
+      } catch (e) {
+        console.error("Favori kitaplar alınamadı:", e);
+        setUserFavorites([]);
+      }
+    };
+
+    fetchFavorites();
+  }, []);
+
+  const handleToggleFavorite = async (e: React.MouseEvent, kitapId: string) => {
+    e.stopPropagation(); // Kartın onClick olayını engelle
+
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      console.error("Kullanıcı bilgisi alınamadı:", error?.message);
+      return;
+    }
+
+    const user_id = user.id;
+
+    const result = await toggleFavoriteBook(user_id, kitapId);
+
+    if (result.success) {
+      if (result.status === "added") {
+        setUserFavorites((prev) => [...prev, kitapId]);
+      } else if (result.status === "removed") {
+        setUserFavorites((prev) => prev.filter((id) => id !== kitapId));
+      }
+    } else {
+      console.error("Favori işlemi başarısız:", result.message);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -93,7 +199,6 @@ function Books() {
           search: search || undefined,
         });
 
-        // Kategoriyi ilişkilendir (kategoriler tablosundan)
         const kitapWithRelations = data.map((k) => ({
           ...k,
           kategori: kategoriler.find((cat) => cat.id === k.kategori_id),
@@ -213,34 +318,66 @@ function Books() {
         </Typography>
       ) : (
         <Grid container spacing={2} justifyContent="center">
-          {pagedKitaplar.map((kitap) => (
-            <Grid key={kitap.id}>
-              <StyledCard onClick={() => setSelectedKitap(kitap)}>
-                <img
-                  src={kitap.kapak_url || "https://via.placeholder.com/150"}
-                  alt={kitap.kitap_adi}
-                  style={{
-                    width: "50%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-                <CardContent sx={{ width: "100%" }}>
-                  <Typography variant="h6">{kitap.kitap_adi}</Typography>
-                  <Typography variant="subtitle1">
-                    {kitap.yazar?.isim ?? "Yazar bilgisi yok"}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Sayfa: {kitap.sayfa_sayisi ?? "Bilinmiyor"} | Stok:{" "}
-                    {kitap.stok_adedi ?? 0}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Kategori: {kitap.kategori?.ad ?? "Yok"}
-                  </Typography>
-                </CardContent>
-              </StyledCard>
-            </Grid>
-          ))}
+          {pagedKitaplar.map((kitap) => {
+            const isFavorited = userFavorites.includes(kitap.id);
+            return (
+              <Grid key={kitap.id}>
+                <StyledCard onClick={() => setSelectedKitap(kitap)}>
+                  <CoverWrapper>
+                    <CoverImage
+                      src={kitap.kapak_url || "https://via.placeholder.com/150"}
+                      alt={kitap.kitap_adi}
+                    />
+                  </CoverWrapper>
+
+                  <ContentWrapper>
+                    <FavoriteButton
+                      onClick={(e) => handleToggleFavorite(e, kitap.id)}
+                      aria-label={
+                        isFavorited ? "Favorilerden kaldır" : "Favorilere ekle"
+                      }
+                      size="large"
+                    >
+                      {isFavorited ? (
+                        <FavoriteIcon color="error" />
+                      ) : (
+                        <FavoriteBorderIcon />
+                      )}
+                    </FavoriteButton>
+                    <Typography
+                      variant="h6"
+                      fontWeight={"bold"}
+                      // noWrap
+                      title={kitap.kitap_adi}
+                    >
+                      {kitap.kitap_adi}
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      noWrap
+                      title={kitap.yazar?.isim}
+                    >
+                      {kitap.yazar?.isim ?? "Yazar bilgisi yok"}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" noWrap>
+                      Sayfa: {kitap.sayfa_sayisi ?? "Bilinmiyor"}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" noWrap>
+                      Stok: {kitap.stok_adedi ?? 0}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      noWrap
+                      title={kitap.kategori?.ad}
+                    >
+                      Kategori: {kitap.kategori?.ad ?? "Yok"}
+                    </Typography>
+                  </ContentWrapper>
+                </StyledCard>
+              </Grid>
+            );
+          })}
         </Grid>
       )}
 
