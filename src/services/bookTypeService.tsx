@@ -2,6 +2,7 @@ export type Tur = { id: string; ad: string };
 export type Kategori = { id: string; ad: string };
 export type Yazar = { id: string; isim: string };
 export type Yayinevi = { id: string; isim: string };
+export type Raf = { id: string; raf_no: string };
 
 export type Kitap = {
   id: string;
@@ -18,4 +19,6 @@ export type Kitap = {
   yazar?: Yazar;
   eklenme_tarihi?: string;
   tur_id?: string;
+  raf_id?: string | null;
+  raf?: Raf;
 };

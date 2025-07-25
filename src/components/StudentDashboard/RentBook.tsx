@@ -121,6 +121,9 @@ const RentBookPage: React.FC = () => {
           <Typography variant="body2">
             Yazar: {book.yazar?.isim ?? "Bilinmiyor"}
           </Typography>
+          <Typography variant="body2">
+            Raf Numarası: {book.raf?.raf_no ?? "Bilinmiyor"}
+          </Typography>
           <Typography variant="body2">Stok: {book.stok_adedi}</Typography>
 
           <TextField

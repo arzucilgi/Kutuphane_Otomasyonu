@@ -1,4 +1,3 @@
-// components/RentedBooksTable.tsx
 import React from "react";
 import {
   Table,
@@ -26,19 +25,63 @@ const RentedBooksTable: React.FC<Props> = ({ rentedBooks }) => {
     return diffDays;
   };
 
+  // Sadece teslim edilmemiş kitapları alıyoruz
+  const unreturnedBooks = rentedBooks.filter(
+    (book) => !book.teslim_edilme_tarihi
+  );
+
   return (
-    <Box sx={{ width: "100%", maxWidth: 800 }}>
-      <Typography variant="h6" gutterBottom>
-        Kiralanan Kitaplar
-      </Typography>
-      {rentedBooks.length === 0 ? (
-        <Typography color="text.secondary">
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: 900,
+        margin: "auto",
+        mt: 3,
+      }}
+    >
+      {unreturnedBooks.length === 0 ? (
+        <Typography
+          color="text.secondary"
+          align="center"
+          sx={{ mt: 4, fontStyle: "italic" }}
+        >
           Kiralanan kitap bulunmuyor.
         </Typography>
       ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
+        <TableContainer
+          component={Paper}
+          elevation={6}
+          sx={{
+            borderRadius: 3,
+            overflowX: "auto",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+          }}
+        >
+          <Table
+            sx={{
+              minWidth: 900,
+              "& thead th": {
+                backgroundColor: "#85bbf1ff",
+                color: "white",
+                fontWeight: "600",
+                fontSize: "1rem",
+                letterSpacing: 0.5,
+              },
+              "& tbody tr": {
+                transition: "background-color 0.3s",
+                cursor: "default",
+                "&:hover": {
+                  backgroundColor: "#f5f5f5",
+                },
+              },
+              "& tbody td": {
+                fontSize: "0.95rem",
+                color: "#333",
+              },
+            }}
+            aria-label="rented books table"
+          >
+            <TableHead sx={{ whiteSpace: "nowrap" }}>
               <TableRow>
                 <TableCell>Kitap Adı</TableCell>
                 <TableCell>Yazar</TableCell>
@@ -49,15 +92,16 @@ const RentedBooksTable: React.FC<Props> = ({ rentedBooks }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rentedBooks.map((book) => {
-                const isReturned = !!book.teslim_edilme_tarihi;
+              {unreturnedBooks.map((book) => {
                 const remainingDays = calculateRemainingDays(
                   book.son_teslim_tarihi
                 );
 
                 return (
-                  <TableRow key={book.id}>
-                    <TableCell>{book.kitap_adi}</TableCell>
+                  <TableRow key={book.id} tabIndex={-1}>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      {book.kitap_adi}
+                    </TableCell>
                     <TableCell>{book.yazar_adi}</TableCell>
                     <TableCell>
                       {book.kiralama_tarihi
@@ -65,11 +109,7 @@ const RentedBooksTable: React.FC<Props> = ({ rentedBooks }) => {
                         : "Bilinmiyor"}
                     </TableCell>
                     <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      {book.teslim_edilme_tarihi
-                        ? new Date(
-                            book.teslim_edilme_tarihi
-                          ).toLocaleDateString()
-                        : "Henüz Teslim Edilmedi"}
+                      Henüz Teslim Edilmedi
                     </TableCell>
                     <TableCell>
                       {book.son_teslim_tarihi
@@ -77,13 +117,11 @@ const RentedBooksTable: React.FC<Props> = ({ rentedBooks }) => {
                         : "Belirlenmemiş"}
                     </TableCell>
                     <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      {isReturned ? (
-                        "Teslim Edildi"
-                      ) : remainingDays !== null ? (
+                      {remainingDays !== null ? (
                         <span
                           style={{
-                            color: remainingDays <= 3 ? "red" : "inherit",
-                            fontWeight: remainingDays <= 3 ? "bold" : "normal",
+                            color: remainingDays <= 3 ? "#d32f2f" : "#388e3c",
+                            fontWeight: remainingDays <= 3 ? "700" : "500",
                           }}
                         >
                           {remainingDays <= 0

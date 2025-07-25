@@ -60,55 +60,88 @@ const StudentProfile: React.FC = () => {
   }
 
   return (
-    <Box sx={{ Width: "100%", mx: "auto", p: 3, overflow: "auto" }}>
-      {/* Flex container */}
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: 1200,
+        mx: "auto",
+        my: 5,
+        px: isSmallScreen ? 2 : 4, // Küçük ekranlarda iç boşluk azaltıldı
+      }}
+    >
+      {/* Üstte kullanıcı bilgileri ve istatistikler yan yana */}
       <Box
         sx={{
           display: "flex",
           flexDirection: isSmallScreen ? "column" : "row",
-          gap: 3,
-          mb: 3,
+          gap: 4,
+          mb: 4,
+          alignItems: "stretch", // Kutuların aynı yüksekliğe sahip olması için
+          minHeight: isSmallScreen ? "auto" : 600, // Küçük ekranlarda yükseklik otomatik
         }}
       >
-        {/* Kullanıcı Bilgileri */}
+        {/* Kullanıcı Bilgileri Kutusu */}
         <Paper
-          sx={{
-            flex: isSmallScreen ? "none" : "1 1 40%",
-            p: 3,
-            minWidth: 280,
-            height: "100%",
-          }}
           elevation={4}
-        >
-          <Typography variant="h6" fontWeight="bold" color="#444">
-            Bilgilerim
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          <UserInfoCard userData={userData} />
-        </Paper>
-
-        {/* Okuma İstatistikleri */}
-        <Paper
           sx={{
-            flex: isSmallScreen ? "none" : "1 1 60%",
+            flex: 1,
+            minWidth: 300,
             p: 3,
-            height: "100%",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
+            maxHeight: isSmallScreen ? "none" : 600, // Büyük ekranda sabit yükseklik
           }}
-          elevation={4}
         >
-          <Typography variant="h6" mb={3} textAlign="center">
-            Okuma İstatistiklerim
+          <UserInfoCard userData={userData} />
+        </Paper>
+
+        {/* Okuma İstatistikleri Kutusu */}
+        <Paper
+          elevation={4}
+          sx={{
+            flex: 1,
+            minWidth: 300,
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            maxHeight: isSmallScreen ? "none" : 600,
+          }}
+        >
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            color="#444"
+            mb={2}
+            sx={{ display: isSmallScreen ? "block" : "none" }}
+          >
+            Okuma İstatistikleri
           </Typography>
           <ReadingStatsChart userId={userData.id} />
         </Paper>
       </Box>
 
-      {/* Kiralanan Kitaplar alt tarafta tam genişlikte */}
-      <Paper sx={{ p: 3 }} elevation={4}>
-        <Typography variant="h6" mb={2}>
+      {/* Kiralanan Kitaplar - tam genişlik */}
+      <Paper
+        elevation={4}
+        sx={{
+          p: 3,
+          mt: isSmallScreen ? 2 : 0, // Küçük ekranlarda üstten boşluk ekle
+          maxHeight: isSmallScreen ? "auto" : 400,
+          maxWidth: isSmallScreen ? "auto" : 1200,
+          overflowY: isSmallScreen ? "auto" : "auto", // Büyük ekranda scroll verilebilir
+          overflowX: isSmallScreen ? "auto" : "auto",
+        }}
+      >
+        <Typography
+          variant="h6"
+          fontWeight="bold"
+          mb={2}
+          display={"flex"}
+          justifyContent={"center"}
+          color="#5da6eeff"
+        >
           Kiraladığım Kitaplar
         </Typography>
         <Divider sx={{ mb: 2 }} />

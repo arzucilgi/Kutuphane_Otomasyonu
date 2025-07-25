@@ -25,6 +25,7 @@ import {
   fetchYazarlar,
   fetchYayinevleri,
   fetchKitaplar,
+  fetchRaflar,
 } from "../../services/bookService";
 
 import {
@@ -33,6 +34,7 @@ import {
   type Yazar,
   type Yayinevi,
   type Kitap,
+  type Raf,
 } from "../../services/bookTypeService";
 import { useNavigate } from "react-router-dom";
 import {
@@ -42,10 +44,12 @@ import {
 import { supabase } from "../../lib/supabaseClient";
 
 // Stil tanımlamaları
-const StyledCard = styled(Card)({
-  height: 300,
-  width: 350,
+const StyledCard = styled(Card)(({ theme }) => ({
+  width: "100%",
+  maxWidth: 380,
+  height: "350px",
   display: "flex",
+  flexDirection: "row",
   cursor: "pointer",
   position: "relative",
   borderRadius: 12,
@@ -55,11 +59,15 @@ const StyledCard = styled(Card)({
     transform: "translateY(-5px)",
     boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
   },
-});
+  [theme.breakpoints.down("sm")]: {
+    flexDirection: "column",
+    height: "auto",
+  },
+}));
 
 const CoverWrapper = styled("div")({
   position: "relative",
-  width: "70%",
+  width: "100%",
   height: "100%",
   overflow: "hidden",
   borderTopLeftRadius: 12,
@@ -106,6 +114,21 @@ function Books() {
   const [loading, setLoading] = useState(false);
   const [selectedKitap, setSelectedKitap] = useState<Kitap | null>(null);
   const [userFavorites, setUserFavorites] = useState<string[]>([]); // favori kitap id'leri
+  const [raflar, setRaflar] = useState<Raf[]>([]);
+  const KitapDetayItem = ({
+    label,
+    value,
+  }: {
+    label: string;
+    value: string | number | undefined | null;
+  }) => (
+    <Box>
+      <Typography variant="subtitle2" color="text.secondary">
+        {label}
+      </Typography>
+      <Typography variant="body1">{value ?? "Yok"}</Typography>
+    </Box>
+  );
 
   const navigate = useNavigate();
 
@@ -169,17 +192,19 @@ function Books() {
   useEffect(() => {
     (async () => {
       try {
-        const [turData, kategoriData, yazarData, yayineviData] =
+        const [turData, kategoriData, yazarData, yayineviData, rafData] =
           await Promise.all([
             fetchTurler(),
             fetchKategoriler(),
             fetchYazarlar(),
             fetchYayinevleri(),
+            fetchRaflar(), // <-- bunu ekledik
           ]);
         setTurler(turData);
         setKategoriler(kategoriData);
         setYazarlar(yazarData);
         setYayinevleri(yayineviData);
+        setRaflar(rafData); // <-- bu da
       } catch (error) {
         console.error("Veri çekilirken hata:", error);
       }
@@ -204,6 +229,7 @@ function Books() {
           kategori: kategoriler.find((cat) => cat.id === k.kategori_id),
           yazar: yazarlar.find((y) => y.id === k.yazar_id),
           yayinevi: yayinevleri.find((y) => y.id === k.yayinevi_id),
+          raf: raflar.find((r) => r.id === k.raf_id),
         }));
 
         setKitaplar(kitapWithRelations);
@@ -373,6 +399,14 @@ function Books() {
                     >
                       Kategori: {kitap.kategori?.ad ?? "Yok"}
                     </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      noWrap
+                      title={kitap.raf?.raf_no}
+                    >
+                      Raf Numarası: {kitap.raf?.raf_no}
+                    </Typography>
                   </ContentWrapper>
                 </StyledCard>
               </Grid>
@@ -411,7 +445,6 @@ function Books() {
         </Button>
       </Box>
 
-      {/* Kitap detay modal */}
       <Dialog
         open={!!selectedKitap}
         onClose={() => setSelectedKitap(null)}
@@ -421,22 +454,38 @@ function Books() {
         <Box
           display="flex"
           flexDirection={{ xs: "column", md: "row" }}
-          sx={{ bgcolor: "#fafafa", borderRadius: 2, overflow: "hidden" }}
+          sx={{
+            bgcolor: "#fafafa",
+            borderRadius: 2,
+            overflow: "hidden",
+            maxHeight: "90vh", // Modalın ekran taşmasını engeller
+          }}
         >
+          {/* Kapak Görseli */}
           <Box
             sx={{
               width: { xs: "100%", md: "40%" },
-              minHeight: 400,
+              height: { xs: 300, md: "auto" }, // mobilde sabit yükseklik
               backgroundImage: `url(${
                 selectedKitap?.kapak_url ||
                 "https://via.placeholder.com/300x400"
               })`,
               backgroundSize: "cover",
               backgroundPosition: "center",
+              flexShrink: 0,
             }}
           />
 
-          <Box flex={1} p={4} position="relative">
+          {/* Detaylar */}
+          <Box
+            flex={1}
+            p={3}
+            sx={{
+              overflowY: "auto", // dikey scroll
+              maxHeight: "90vh", // içerik çok uzunsa scroll'a düş
+              position: "relative",
+            }}
+          >
             <IconButton
               aria-label="close"
               onClick={() => setSelectedKitap(null)}
@@ -449,56 +498,34 @@ function Books() {
               {selectedKitap?.kitap_adi}
             </Typography>
 
-            <Box display="flex" flexDirection="column" gap={2}>
+            <Box display="flex" flexDirection="column" gap={2} mt={4}>
+              <KitapDetayItem
+                label="Yazar"
+                value={selectedKitap?.yazar?.isim}
+              />
+              <KitapDetayItem
+                label="Yayınevi"
+                value={selectedKitap?.yayinevi?.isim}
+              />
+              <KitapDetayItem
+                label="Sayfa Sayısı"
+                value={selectedKitap?.sayfa_sayisi}
+              />
+              <KitapDetayItem label="Stok" value={selectedKitap?.stok_adedi} />
+              <KitapDetayItem
+                label="Kategori"
+                value={selectedKitap?.kategori?.ad}
+              />
+              <KitapDetayItem
+                label="Raf Numarası"
+                value={selectedKitap?.raf?.raf_no}
+              />
+              <KitapDetayItem
+                label="Eklenme Tarihi"
+                value={selectedKitap?.eklenme_tarihi?.split("T")[0]}
+              />
+
               <Box>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Yazar
-                </Typography>
-                <Typography variant="body1">
-                  {selectedKitap?.yazar?.isim ?? "Yazar bilgisi yok"}
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Yayınevi
-                </Typography>
-                <Typography variant="body1">
-                  {selectedKitap?.yayinevi?.isim ?? "Yayınevi bilgisi yok"}
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Sayfa Sayısı
-                </Typography>
-                <Typography variant="body1">
-                  {selectedKitap?.sayfa_sayisi ?? "Bilinmiyor"}
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Stok
-                </Typography>
-                <Typography variant="body1">
-                  {selectedKitap?.stok_adedi ?? 0}
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Kategori
-                </Typography>
-                <Typography variant="body1">
-                  {selectedKitap?.kategori?.ad ?? "Yok"}
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Eklenme Tarihi
-                </Typography>
-                <Typography variant="body1">
-                  {selectedKitap?.eklenme_tarihi?.split("T")[0] ?? "Yok"}
-                </Typography>
-              </Box>
-              <Box mt={2}>
                 <Typography
                   variant="subtitle2"
                   color="text.secondary"
@@ -509,20 +536,21 @@ function Books() {
                 <Typography variant="body2" sx={{ whiteSpace: "pre-line" }}>
                   {selectedKitap?.ozet ?? "Özet bulunamadı."}
                 </Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  sx={{ mt: 3 }}
-                  onClick={() =>
-                    navigate("/studentDashboard/rentBook", {
-                      state: { kitap: selectedKitap },
-                    })
-                  }
-                >
-                  Hızlı Ödünç Al
-                </Button>
               </Box>
+
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                sx={{ mt: 2 }}
+                onClick={() =>
+                  navigate("/studentDashboard/rentBook", {
+                    state: { kitap: selectedKitap },
+                  })
+                }
+              >
+                Hızlı Ödünç Al
+              </Button>
             </Box>
           </Box>
         </Box>

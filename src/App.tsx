@@ -7,7 +7,7 @@ import StudentDashboard from "./pages/StudentDashboard";
 import StudentProfile from "./components/StudentDashboard/StudentProfile/StudentProfile";
 import { Book } from "@mui/icons-material";
 import Books from "./components/StudentDashboard/Books";
-import BooksStudentReads from "./components/StudentDashboard/BooksStudentReads";
+import UserRentHistoryTable from "./components/StudentDashboard/UserRentHistoryTable";
 import RecommendedBooks from "./components/StudentDashboard/RecommendedBooks";
 import ProtectedRoute from "./components/StudentDashboard/ProtectedRoute";
 import RentBook from "./components/StudentDashboard/RentBook";
@@ -35,7 +35,7 @@ function App() {
           <Route index element={<StudentProfile />} />
           <Route path="profile" element={<StudentProfile />} />
           <Route path="books" element={<Books />} />
-          <Route path="readBooks" element={<BooksStudentReads />} />
+          <Route path="readBooks" element={<UserRentHistoryTable />} />
           <Route path="recommendations" element={<RecommendedBooks />} />
           <Route path="rentBook" element={<RentBook />} />
         </Route>

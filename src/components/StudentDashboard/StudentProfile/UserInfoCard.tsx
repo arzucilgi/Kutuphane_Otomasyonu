@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -9,16 +9,31 @@ import {
   Chip,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
+import { getActiveRentalCount } from "../../../services/RentCheckService";
 
 interface Props {
   userData: any;
 }
 
 const UserInfoCard: React.FC<Props> = ({ userData }) => {
+  // Aktif kiralık kitap sayısını state olarak tut
+  const [activeCount, setActiveCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Asenkron fonksiyonu useEffect içinde çağır
+    const fetchActiveCount = async () => {
+      const count = await getActiveRentalCount(userData.id);
+      setActiveCount(count);
+    };
+
+    fetchActiveCount();
+  }, [userData.id]);
+
   return (
     <Card
       sx={{
-        maxWidth: 500,
+        width: "70%",
+        height: "80%",
         mx: "auto",
         p: 3,
         borderRadius: 5,
@@ -57,7 +72,7 @@ const UserInfoCard: React.FC<Props> = ({ userData }) => {
 
       <CardContent sx={{ px: 0 }}>
         <Box display="flex" flexDirection="column" gap={1}>
-          <Typography variant="body1">
+          <Typography variant="body1" color="text.secondary">
             <strong>Rol:</strong>{" "}
             <Chip
               label={userData.rol.toUpperCase()}
@@ -68,7 +83,7 @@ const UserInfoCard: React.FC<Props> = ({ userData }) => {
             />
           </Typography>
 
-          <Typography variant="body1">
+          <Typography variant="body1" color="text.secondary">
             <strong>Ceza Tarihi:</strong>{" "}
             {userData.ceza_tarihi ? (
               <span style={{ color: "#d32f2f", fontWeight: 500 }}>
@@ -79,17 +94,13 @@ const UserInfoCard: React.FC<Props> = ({ userData }) => {
             )}
           </Typography>
 
-          <Typography variant="body1">
+          <Typography variant="body1" color="text.secondary">
             <strong>Aktif Kiralık Kitap:</strong>{" "}
-            {userData.aktif_kiralik_kitap_sayisi}
+            {activeCount !== null ? activeCount : "Yükleniyor..."}
           </Typography>
 
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ fontStyle: "italic", mt: 1 }}
-          >
-            Hesap Oluşturulma:{" "}
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+            <strong>Hesap Oluşturulma Tarihi: </strong>
             {new Date(userData.olusturulma_tarihi).toLocaleDateString()}
           </Typography>
         </Box>
