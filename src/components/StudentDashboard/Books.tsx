@@ -42,6 +42,7 @@ import {
   fetchUserFavorites,
 } from "../../services/FavoriteService";
 import { supabase } from "../../lib/supabaseClient";
+import BookDetailDialog from "../StudentDashboard/BookDetailDialog";
 
 // Stil tanımlamaları
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -115,22 +116,6 @@ function Books() {
   const [selectedKitap, setSelectedKitap] = useState<Kitap | null>(null);
   const [userFavorites, setUserFavorites] = useState<string[]>([]); // favori kitap id'leri
   const [raflar, setRaflar] = useState<Raf[]>([]);
-  const KitapDetayItem = ({
-    label,
-    value,
-  }: {
-    label: string;
-    value: string | number | undefined | null;
-  }) => (
-    <Box>
-      <Typography variant="subtitle2" color="text.secondary">
-        {label}
-      </Typography>
-      <Typography variant="body1">{value ?? "Yok"}</Typography>
-    </Box>
-  );
-
-  const navigate = useNavigate();
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -445,116 +430,11 @@ function Books() {
         </Button>
       </Box>
 
-      <Dialog
+      <BookDetailDialog
         open={!!selectedKitap}
         onClose={() => setSelectedKitap(null)}
-        maxWidth="md"
-        fullWidth
-      >
-        <Box
-          display="flex"
-          flexDirection={{ xs: "column", md: "row" }}
-          sx={{
-            bgcolor: "#fafafa",
-            borderRadius: 2,
-            overflow: "hidden",
-            maxHeight: "90vh", // Modalın ekran taşmasını engeller
-          }}
-        >
-          {/* Kapak Görseli */}
-          <Box
-            sx={{
-              width: { xs: "100%", md: "40%" },
-              height: { xs: 300, md: "auto" }, // mobilde sabit yükseklik
-              backgroundImage: `url(${
-                selectedKitap?.kapak_url ||
-                "https://via.placeholder.com/300x400"
-              })`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              flexShrink: 0,
-            }}
-          />
-
-          {/* Detaylar */}
-          <Box
-            flex={1}
-            p={3}
-            sx={{
-              overflowY: "auto", // dikey scroll
-              maxHeight: "90vh", // içerik çok uzunsa scroll'a düş
-              position: "relative",
-            }}
-          >
-            <IconButton
-              aria-label="close"
-              onClick={() => setSelectedKitap(null)}
-              sx={{ position: "absolute", right: 8, top: 8 }}
-            >
-              <CloseIcon />
-            </IconButton>
-
-            <Typography variant="h5" fontWeight="bold" gutterBottom>
-              {selectedKitap?.kitap_adi}
-            </Typography>
-
-            <Box display="flex" flexDirection="column" gap={2} mt={4}>
-              <KitapDetayItem
-                label="Yazar"
-                value={selectedKitap?.yazar?.isim}
-              />
-              <KitapDetayItem
-                label="Yayınevi"
-                value={selectedKitap?.yayinevi?.isim}
-              />
-              <KitapDetayItem
-                label="Sayfa Sayısı"
-                value={selectedKitap?.sayfa_sayisi}
-              />
-              <KitapDetayItem label="Stok" value={selectedKitap?.stok_adedi} />
-              <KitapDetayItem
-                label="Kategori"
-                value={selectedKitap?.kategori?.ad}
-              />
-              <KitapDetayItem
-                label="Raf Numarası"
-                value={selectedKitap?.raf?.raf_no}
-              />
-              <KitapDetayItem
-                label="Eklenme Tarihi"
-                value={selectedKitap?.eklenme_tarihi?.split("T")[0]}
-              />
-
-              <Box>
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
-                >
-                  Özet
-                </Typography>
-                <Typography variant="body2" sx={{ whiteSpace: "pre-line" }}>
-                  {selectedKitap?.ozet ?? "Özet bulunamadı."}
-                </Typography>
-              </Box>
-
-              <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                sx={{ mt: 2 }}
-                onClick={() =>
-                  navigate("/studentDashboard/rentBook", {
-                    state: { kitap: selectedKitap },
-                  })
-                }
-              >
-                Hızlı Ödünç Al
-              </Button>
-            </Box>
-          </Box>
-        </Box>
-      </Dialog>
+        kitap={selectedKitap}
+      />
     </Box>
   );
 }

@@ -10,17 +10,24 @@ import {
   CircularProgress,
   Paper,
   TablePagination,
+  Button,
+  Rating,
 } from "@mui/material";
-import { fetchUserFavorites } from "../../services/FavoriteService";
 import { supabase } from "../../lib/supabaseClient";
+import { fetchUserFavorites } from "../../services/FavoriteService";
+import { fetchAverageRatingByBookId } from "../../services/commentService";
 import type { Kitap } from "../../services/bookTypeService";
+import BookDetailDialog from "../../components/StudentDashboard/BookDetailDialog"; // Modal bileşen yolu (uygunsa düzenle)
 
 const FavoriteBooksTable: React.FC = () => {
   const [favoriteBooks, setFavoriteBooks] = useState<Kitap[]>([]);
-  console.log(favoriteBooks);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState(0);
-  const rowsPerPage = 5;
+  const rowsPerPage = 8;
+  const [averageRatings, setAverageRatings] = useState<{
+    [bookId: string]: number;
+  }>({});
+  const [selectedKitap, setSelectedKitap] = useState<Kitap | null>(null);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -43,9 +50,7 @@ const FavoriteBooksTable: React.FC = () => {
       }
 
       const userId = session.user.id;
-
       const favoriteIds = await fetchUserFavorites(userId);
-      console.log(favoriteIds);
 
       if (favoriteIds.length === 0) {
         setFavoriteBooks([]);
@@ -55,7 +60,7 @@ const FavoriteBooksTable: React.FC = () => {
 
       const { data, error } = await supabase
         .from("kitaplar")
-        .select("*,yazar: yazar_id (id, isim)")
+        .select("*, yazar: yazar_id (id, isim)")
         .in("id", favoriteIds);
 
       if (error) {
@@ -63,6 +68,25 @@ const FavoriteBooksTable: React.FC = () => {
         setFavoriteBooks([]);
       } else {
         setFavoriteBooks(data);
+
+        // Ortalama puanları çek
+        const ratings = await Promise.all(
+          data.map(async (book) => {
+            try {
+              const avg = await fetchAverageRatingByBookId(book.id);
+              return { kitapId: book.id, avg };
+            } catch {
+              return { kitapId: book.id, avg: 0 };
+            }
+          })
+        );
+
+        const ratingMap: { [id: string]: number } = {};
+        ratings.forEach(({ kitapId, avg }) => {
+          ratingMap[kitapId] = avg;
+        });
+
+        setAverageRatings(ratingMap);
       }
 
       setLoading(false);
@@ -74,7 +98,7 @@ const FavoriteBooksTable: React.FC = () => {
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" mt={5}>
-        <CircularProgress />
+        <CircularProgress color="primary" />
       </Box>
     );
   }
@@ -88,41 +112,110 @@ const FavoriteBooksTable: React.FC = () => {
   }
 
   return (
-    <Paper sx={{ p: 2, mt: 4 }}>
-      <Typography variant="h6" gutterBottom color="primary">
-        Favori Kitapların
+    <Paper
+      sx={{
+        p: 3,
+        m: 4,
+        borderRadius: "16px",
+        // background: "linear-gradient(to bottom right, #e3f2fd, #bbdefb)",
+        boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
+      }}
+    >
+      <Typography
+        variant="h4"
+        gutterBottom
+        color="primary.main"
+        fontWeight={600}
+      >
+        Favori Kitaplarım
       </Typography>
       <Table>
         <TableHead>
-          <TableRow>
+          <TableRow
+            sx={{
+              backgroundColor: "#bbdefb",
+              "& th": {
+                fontWeight: 600,
+                whiteSpace: "nowrap",
+                color: "#777575ff",
+              },
+            }}
+          >
             <TableCell>Kapak</TableCell>
             <TableCell>Kitap Adı</TableCell>
             <TableCell>Yazar</TableCell>
             <TableCell>Sayfa Sayısı</TableCell>
             <TableCell>Stok Sayısı</TableCell>
-            <TableCell>Hızlı Ödünç Al</TableCell>
+            <TableCell>Ortalama Puan</TableCell>
+            <TableCell>Detay</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {favoriteBooks
             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
             .map((book) => (
-              <TableRow key={book.id}>
+              <TableRow
+                key={book.id}
+                sx={{
+                  "&:hover": {
+                    backgroundColor: "#e3f2fd",
+                  },
+                }}
+              >
                 <TableCell>
                   <img
-                    src={book.kapak_url}
+                    src={book.kapak_url ?? "/placeholder.png"}
                     alt={book.kitap_adi}
-                    style={{ width: 60, height: 90, objectFit: "cover" }}
+                    style={{
+                      width: 60,
+                      height: 90,
+                      objectFit: "cover",
+                      borderRadius: 4,
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                    }}
                   />
                 </TableCell>
                 <TableCell>{book.kitap_adi}</TableCell>
                 <TableCell>{book.yazar?.isim}</TableCell>
-                <TableCell>{book.sayfa_sayisi}</TableCell>
-                <TableCell>{book.stok_adedi}</TableCell>
+                <TableCell>{book.sayfa_sayisi ?? "-"}</TableCell>
+                <TableCell>{book.stok_adedi ?? "-"}</TableCell>
+                <TableCell>
+                  <Rating
+                    value={averageRatings[book.id] || 0}
+                    precision={0.5}
+                    readOnly
+                    size="small"
+                  />
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      backgroundColor: "#0d47a1",
+                      color: "#fff",
+                      "&:hover": {
+                        backgroundColor: "#1565c0",
+                      },
+                      fontWeight: 600,
+                      fontSize: "0.85rem",
+                      textTransform: "none",
+                    }}
+                    onClick={() => setSelectedKitap(book)}
+                  >
+                    Kitap Detayı
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
         </TableBody>
       </Table>
+
+      <BookDetailDialog
+        open={!!selectedKitap}
+        onClose={() => setSelectedKitap(null)}
+        kitap={selectedKitap}
+      />
+
       <TablePagination
         rowsPerPageOptions={[8]}
         component="div"
