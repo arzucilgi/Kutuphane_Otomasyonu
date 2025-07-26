@@ -22,3 +22,12 @@ export type Kitap = {
   raf_id?: string | null;
   raf?: Raf;
 };
+
+export interface Comment {
+  id: string;
+  kullanici_id: string;
+  kitap_id: string;
+  yorum: string;
+  puan: number;
+  tarih: string;
+}

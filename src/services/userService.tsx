@@ -36,6 +36,7 @@ export const fetchBooksRentedByUser = async (userId: string) => {
       teslim_edilme_tarihi,
       kitaplar (
         kitap_adi,
+        id,
         yazarlar (
           isim
         )
@@ -52,6 +53,7 @@ export const fetchBooksRentedByUser = async (userId: string) => {
 
   return data.map((item: any) => ({
     id: item.id,
+    kitap_id: item.kitaplar?.id,
     kitap_adi: item.kitaplar?.kitap_adi || "Bilinmiyor",
     yazar_adi: item.kitaplar?.yazarlar?.isim || "Bilinmiyor",
     kiralama_tarihi: item.kiralama_tarihi,
