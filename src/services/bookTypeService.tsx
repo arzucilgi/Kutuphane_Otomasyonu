@@ -9,7 +9,7 @@ export type Kitap = {
   kitap_adi: string;
   sayfa_sayisi: number | null;
   stok_adedi: number | null;
-  kapak_url: string | null;
+  kapak_url: string | undefined;
   ozet: string | null;
   kategori_id: string | null;
   kategori?: Kategori;

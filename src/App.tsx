@@ -8,7 +8,7 @@ import StudentProfile from "./components/StudentDashboard/StudentProfile/Student
 import { Book } from "@mui/icons-material";
 import Books from "./components/StudentDashboard/Books";
 import UserRentHistoryTable from "./components/StudentDashboard/UserRentHistoryTable";
-import RecommendedBooks from "./components/StudentDashboard/RecommendedBooks";
+import FavoriteBooksTable from "./components/StudentDashboard/FavoriteBooksTable";
 import ProtectedRoute from "./components/StudentDashboard/ProtectedRoute";
 import RentBook from "./components/StudentDashboard/RentBook";
 import { ToastContainer } from "react-toastify";
@@ -36,7 +36,7 @@ function App() {
           <Route path="profile" element={<StudentProfile />} />
           <Route path="books" element={<Books />} />
           <Route path="readBooks" element={<UserRentHistoryTable />} />
-          <Route path="recommendations" element={<RecommendedBooks />} />
+          <Route path="recommendations" element={<FavoriteBooksTable />} />
           <Route path="rentBook" element={<RentBook />} />
         </Route>
       </Routes>

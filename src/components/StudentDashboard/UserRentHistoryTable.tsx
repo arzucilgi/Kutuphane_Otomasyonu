@@ -21,6 +21,7 @@ import {
   TextField,
   DialogActions,
   Rating,
+  TablePagination,
 } from "@mui/material";
 import type { Comment } from "../../services/bookTypeService";
 import {
@@ -61,6 +62,12 @@ const UserRentHistoryTable: React.FC = () => {
   );
   const [rating, setRating] = useState<number | null>(0);
   const [comment, setComment] = useState("");
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 8;
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
 
   const handleOpen = async (book: AggregatedRental) => {
     setSelectedBook(book);
@@ -249,54 +256,89 @@ const UserRentHistoryTable: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rentedBooks.map((book) => (
-              <TableRow
-                key={book.kitap_id}
-                sx={{
-                  "&:hover": {
-                    backgroundColor: "#e3f2fd",
-                  },
-                }}
-              >
-                <TableCell>{book.kitap_adi}</TableCell>
-                <TableCell>{book.yazar_adi}</TableCell>
-                <TableCell>
-                  {new Date(book.ilk_kiralama_tarihi).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  {new Date(book.son_teslim_tarihi).toLocaleDateString()}
-                </TableCell>
-                <TableCell>{book.okunma_sayisi}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="contained"
-                    onClick={() => handleOpen(book)}
-                    color="primary"
-                    sx={{
-                      textTransform: "none",
-                      borderRadius: 2,
-                      whiteSpace: "nowrap",
-                      boxShadow: "0 2px 6px rgba(33, 150, 243, 0.3)",
-                      transition: "0.3s",
-                      "&:hover": {
-                        backgroundColor: "#1976d2",
-                      },
-                    }}
-                  >
-                    Yorum Yap
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <Rating
-                    value={averageRatings[book.kitap_id] || 0}
-                    precision={0.5}
-                    readOnly
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
+            {rentedBooks
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((book) => (
+                <TableRow
+                  key={book.kitap_id}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "#e3f2fd",
+                    },
+                  }}
+                >
+                  <TableCell>{book.kitap_adi}</TableCell>
+                  <TableCell>{book.yazar_adi}</TableCell>
+                  <TableCell>
+                    {new Date(book.ilk_kiralama_tarihi).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    {new Date(book.son_teslim_tarihi).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>{book.okunma_sayisi}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      onClick={() => handleOpen(book)}
+                      color="primary"
+                      sx={{
+                        textTransform: "none",
+                        borderRadius: 2,
+                        whiteSpace: "nowrap",
+                        boxShadow: "0 2px 6px rgba(33, 150, 243, 0.3)",
+                        transition: "0.3s",
+                        "&:hover": {
+                          backgroundColor: "#1976d2",
+                        },
+                      }}
+                    >
+                      Yorum Yap
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Rating
+                      value={averageRatings[book.kitap_id] || 0}
+                      precision={0.5}
+                      readOnly
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={[8]}
+          component="div"
+          count={rentedBooks.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            "& .MuiTablePagination-toolbar": {
+              fontSize: "1.2rem",
+            },
+            "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+              {
+                fontSize: "1.1rem",
+                fontWeight: "bold",
+                color: "#0d47a1",
+              },
+            "& .MuiTablePagination-select": {
+              fontSize: "1.1rem",
+            },
+            //İLERİ – GERİ BUTONLARINI BÜYÜTÜR
+            "& .MuiIconButton-root": {
+              padding: "8px",
+              color: "#0d47a1",
+            },
+            "& .MuiSvgIcon-root": {
+              fontSize: "2rem",
+            },
+          }}
+        />
       </TableContainer>
 
       {/* Review Dialog */}
