@@ -20,7 +20,7 @@ const items = [
   { label: "Kitaplar", icon: "📚", to: "books" },
   // { label: "Ödünç Al", icon: "📥", to: "rentBook" },
   { label: "Okuduklarım", icon: "📖", to: "readBooks" },
-  { label: "Öneriler", icon: "🌟", to: "recommendations" },
+  { label: "Favorilerim", icon: "🌟", to: "recommendations" },
 ];
 
 const StudentNavbar = () => {

@@ -63,6 +63,7 @@ const UserRentHistoryTable: React.FC = () => {
   const [rating, setRating] = useState<number | null>(0);
   const [comment, setComment] = useState("");
   const [page, setPage] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
   const rowsPerPage = 8;
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -190,6 +191,16 @@ const UserRentHistoryTable: React.FC = () => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    setPage(0); // arama yapıldığında sayfa başa dönsün
+  }, [searchQuery]);
+
+  const filteredBooks = rentedBooks.filter((book) =>
+    `${book.kitap_adi} ${book.yazar_adi}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
   if (loading)
     return (
       <Box display="flex" justifyContent="center" mt={4}>
@@ -198,8 +209,8 @@ const UserRentHistoryTable: React.FC = () => {
     );
   if (rentedBooks.length === 0)
     return (
-      <Box textAlign="center" mt={4}>
-        <Typography>No returned books found for the user.</Typography>
+      <Box mt={5} textAlign="center" color="text.secondary">
+        <Typography>Henüz okunmuş kitap bulunamadı.</Typography>
       </Box>
     );
 
@@ -208,19 +219,52 @@ const UserRentHistoryTable: React.FC = () => {
       m={4}
       p={4}
       sx={{
-        // backgroundColor: "#e3f2fd",
         borderRadius: 3,
         boxShadow: "0 6px 24px rgba(33, 150, 243, 0.2)",
       }}
     >
-      <Typography
-        variant="h4"
-        gutterBottom
-        color="primary.main"
-        fontWeight={600}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: {
+            xs: "column",
+            sm: "column",
+            md: "row",
+          },
+
+          justifyContent: {
+            xs: "center",
+            sm: "center",
+            md: "space-between",
+          },
+          gap: 2, // Elemanlar arası boşluk
+        }}
       >
-        Okuduğum Kitaplar
-      </Typography>
+        <Typography
+          variant="h4"
+          gutterBottom
+          color="primary.main"
+          fontWeight={600}
+        >
+          Okuduğum Kitaplar
+        </Typography>
+
+        <TextField
+          label="Kitap adı veya yazar adı ile ara"
+          variant="outlined"
+          fullWidth
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{
+            mb: 3,
+            width: {
+              xs: "90%",
+              sm: "60%",
+              md: "30%",
+            },
+          }}
+        />
+      </Box>
 
       <TableContainer
         component={Paper}
@@ -256,7 +300,7 @@ const UserRentHistoryTable: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rentedBooks
+            {filteredBooks
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((book) => (
                 <TableRow
@@ -309,7 +353,7 @@ const UserRentHistoryTable: React.FC = () => {
         <TablePagination
           rowsPerPageOptions={[8]}
           component="div"
-          count={rentedBooks.length}
+          count={filteredBooks.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
@@ -329,7 +373,6 @@ const UserRentHistoryTable: React.FC = () => {
             "& .MuiTablePagination-select": {
               fontSize: "1.1rem",
             },
-            //İLERİ – GERİ BUTONLARINI BÜYÜTÜR
             "& .MuiIconButton-root": {
               padding: "8px",
               color: "#0d47a1",

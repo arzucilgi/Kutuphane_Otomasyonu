@@ -35,6 +35,7 @@ const RentedBooksTable: React.FC<Props> = ({ rentedBooks }) => {
       sx={{
         width: "100%",
         maxWidth: 900,
+        height: "auto",
         margin: "auto",
         mt: 3,
       }}

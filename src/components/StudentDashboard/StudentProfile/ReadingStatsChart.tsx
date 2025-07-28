@@ -71,14 +71,14 @@ const ReadingStatsChart: React.FC<Props> = ({ userId }) => {
         label: "Okunan Kitap Sayısı",
         data: stats.map((s) => s.kitap_sayisi),
         backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-          "#FF9F40",
-          "#8BC34A",
-          "#E91E63",
+          "#ff9ca3", // pastel kırmızı-pembe (#FF6384)
+          "#8fc8ff", // pastel açık mavi (#36A2EB)
+          "#ffdb8c", // pastel sarı (#FFCE56)
+          "#8fe3df", // pastel turkuaz (#4BC0C0)
+          "#b7a4ff", // pastel mor (#9966FF)
+          "#ffbb8a", // pastel turuncu (#FF9F40)
+          "#b7d86a", // pastel açık yeşil (#8BC34A)
+          "#f58ab3", // pastel pembe (#E91E63)
         ],
         borderColor: "#fff",
         borderWidth: 2,

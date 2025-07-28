@@ -7,6 +7,8 @@ import {
   Divider,
   useMediaQuery,
   useTheme,
+  Modal,
+  IconButton,
 } from "@mui/material";
 import {
   fetchLoggedInUserProfile,
@@ -15,11 +17,14 @@ import {
 import UserInfoCard from "../StudentProfile/UserInfoCard";
 import RentedBooksTable from "../StudentProfile/RentedBooksTable";
 import ReadingStatsChart from "./ReadingStatsChart";
+import WeeklyTopBooksTable from "./WeeklyTopBooksTable";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 const StudentProfile: React.FC = () => {
   const [userData, setUserData] = useState<any>(null);
   const [rentedBooks, setRentedBooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openModal, setOpenModal] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -40,6 +45,11 @@ const StudentProfile: React.FC = () => {
 
     loadData();
   }, []);
+
+  // Kullanıcı güncellendiğinde userData state'ini yenile
+  const handleUserUpdate = (updatedUser: any) => {
+    setUserData(updatedUser);
+  };
 
   if (loading) {
     return (
@@ -65,38 +75,81 @@ const StudentProfile: React.FC = () => {
         width: "100%",
         maxWidth: 1200,
         mx: "auto",
-        my: 5,
-        px: isSmallScreen ? 2 : 4, // Küçük ekranlarda iç boşluk azaltıldı
+        my: 2,
+        px: isSmallScreen ? 2 : 4,
       }}
     >
-      {/* Üstte kullanıcı bilgileri ve istatistikler yan yana */}
+      {/* Kullanıcı Bilgileri Butonu */}
+      <Box
+        display="flex"
+        justifyContent="flex-end"
+        mb={2}
+        mt={0}
+        sx={{
+          fontSize: 40,
+          "& .MuiIconButton-root": {
+            fontSize: 48,
+            backgroundColor: "#e3f2fd",
+            borderRadius: "50%",
+            transition: "all 0.3s ease",
+            boxShadow: "0 4px 8px rgba(25, 118, 210, 0.3)",
+            "&:hover": {
+              backgroundColor: "#90caf9",
+              transform: "scale(1.1)",
+              boxShadow: "0 6px 12px rgba(25, 118, 210, 0.6)",
+            },
+          },
+        }}
+      >
+        <IconButton onClick={() => setOpenModal(true)} color="primary">
+          <AccountCircleIcon fontSize="inherit" />
+        </IconButton>
+      </Box>
+
+      {/* Modal */}
+      <Modal open={openModal} onClose={() => setOpenModal(false)}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            borderRadius: 3,
+            p: 4,
+            width: 500,
+            height: 600,
+            maxWidth: "90%",
+            outline: "none",
+          }}
+        >
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            mb={2}
+            textAlign="center"
+            color="primary"
+          >
+            Kullanıcı Bilgileri
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          {/* Güncelleme callback'i ile UserInfoCard */}
+          <UserInfoCard userData={userData} onUpdate={handleUserUpdate} />
+        </Box>
+      </Modal>
+
+      {/* İstatistik ve tablolar */}
       <Box
         sx={{
           display: "flex",
           flexDirection: isSmallScreen ? "column" : "row",
           gap: 4,
           mb: 4,
-          alignItems: "stretch", // Kutuların aynı yüksekliğe sahip olması için
-          minHeight: isSmallScreen ? "auto" : 600, // Küçük ekranlarda yükseklik otomatik
+          alignItems: "stretch",
+          minHeight: isSmallScreen ? "auto" : 600,
         }}
       >
-        {/* Kullanıcı Bilgileri Kutusu */}
-        <Paper
-          elevation={4}
-          sx={{
-            flex: 1,
-            minWidth: 300,
-            p: 3,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            maxHeight: isSmallScreen ? "none" : 600, // Büyük ekranda sabit yükseklik
-          }}
-        >
-          <UserInfoCard userData={userData} />
-        </Paper>
-
-        {/* Okuma İstatistikleri Kutusu */}
         <Paper
           elevation={4}
           sx={{
@@ -109,29 +162,34 @@ const StudentProfile: React.FC = () => {
             maxHeight: isSmallScreen ? "none" : 600,
           }}
         >
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            color="#444"
-            mb={2}
-            sx={{ display: isSmallScreen ? "block" : "none" }}
-          >
-            Okuma İstatistikleri
-          </Typography>
           <ReadingStatsChart userId={userData.id} />
+        </Paper>
+        <Paper
+          elevation={4}
+          sx={{
+            flex: 1,
+            minWidth: 300,
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            maxHeight: isSmallScreen ? "none" : 600,
+          }}
+        >
+          <WeeklyTopBooksTable />
         </Paper>
       </Box>
 
-      {/* Kiralanan Kitaplar - tam genişlik */}
+      {/* Kiralanan Kitaplar */}
       <Paper
         elevation={4}
         sx={{
           p: 3,
-          mt: isSmallScreen ? 2 : 0, // Küçük ekranlarda üstten boşluk ekle
-          maxHeight: isSmallScreen ? "auto" : 400,
+          mt: isSmallScreen ? 2 : 0,
+          maxHeight: isSmallScreen ? "auto" : 800,
           maxWidth: isSmallScreen ? "auto" : 1200,
-          overflowY: isSmallScreen ? "auto" : "auto", // Büyük ekranda scroll verilebilir
-          overflowX: isSmallScreen ? "auto" : "auto",
+          overflowY: "auto",
+          overflowX: "auto",
         }}
       >
         <Typography

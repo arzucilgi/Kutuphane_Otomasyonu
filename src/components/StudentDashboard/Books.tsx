@@ -116,6 +116,7 @@ function Books() {
   const [selectedKitap, setSelectedKitap] = useState<Kitap | null>(null);
   const [userFavorites, setUserFavorites] = useState<string[]>([]); // favori kitap id'leri
   const [raflar, setRaflar] = useState<Raf[]>([]);
+  const [selectedYazar, setSelectedYazar] = useState("");
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -206,6 +207,7 @@ function Books() {
         const data = await fetchKitaplar({
           turId: selectedTur || undefined,
           kategoriId: selectedKategori || undefined,
+          yazarId: selectedYazar || undefined, // YENİ
           search: search || undefined,
         });
 
@@ -231,6 +233,7 @@ function Books() {
   }, [
     selectedTur,
     selectedKategori,
+    selectedYazar, // YENİ
     search,
     yazarlar,
     yayinevleri,
@@ -297,6 +300,28 @@ function Books() {
             {kategoriler.map((kategori) => (
               <MenuItem key={kategori.id} value={kategori.id}>
                 {kategori.ad}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl sx={{ minWidth: 150, flex: "1 1 200px" }}>
+          <Select
+            value={selectedYazar}
+            onChange={(e) => setSelectedYazar(e.target.value)}
+            displayEmpty
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 48 * 6 + 8,
+                  width: 250,
+                },
+              },
+            }}
+          >
+            <MenuItem value="">Tüm Yazarlar</MenuItem>
+            {yazarlar.map((yazar) => (
+              <MenuItem key={yazar.id} value={yazar.id}>
+                {yazar.isim}
               </MenuItem>
             ))}
           </Select>

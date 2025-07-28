@@ -108,6 +108,7 @@ export async function fetchRaflar(): Promise<Raf[]> {
 type KitapFilter = {
   turId?: string;
   kategoriId?: string;
+  yazarId?: string;
   search?: string;
 };
 
@@ -122,6 +123,7 @@ export async function fetchKitaplar(
 
   if (filter.turId) query = query.eq("tur_id", filter.turId);
   if (filter.kategoriId) query = query.eq("kategori_id", filter.kategoriId);
+  if (filter.yazarId) query = query.eq("yazar_id", filter.yazarId);
   if (filter.search) query = query.ilike("kitap_adi", `%${filter.search}%`);
 
   const { data, error } = await query;

@@ -7,27 +7,116 @@ import {
   Avatar,
   Divider,
   Chip,
+  TextField,
+  Button,
+  Stack,
+  Alert,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
+import { supabase } from "../../../lib/supabaseClient";
 import { getActiveRentalCount } from "../../../services/RentCheckService";
 
 interface Props {
   userData: any;
+  onUpdate?: (updatedUser: any) => void;
 }
 
-const UserInfoCard: React.FC<Props> = ({ userData }) => {
-  // Aktif kiralık kitap sayısını state olarak tut
+const UserInfoCard: React.FC<Props> = ({ userData, onUpdate }) => {
   const [activeCount, setActiveCount] = useState<number | null>(null);
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState(userData.ad_soyad || "");
+  const [email, setEmail] = useState(userData.eposta || "");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
   useEffect(() => {
-    // Asenkron fonksiyonu useEffect içinde çağır
     const fetchActiveCount = async () => {
       const count = await getActiveRentalCount(userData.id);
       setActiveCount(count);
     };
-
     fetchActiveCount();
   }, [userData.id]);
+
+  const handleSave = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      // 1. Mevcut oturumu al
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getUser();
+      if (sessionError) throw sessionError;
+
+      const currentUserId = sessionData?.user?.id;
+      if (currentUserId !== userData.id) {
+        throw new Error("Sadece kendi profilinizi güncelleyebilirsiniz.");
+      }
+
+      // 2. Supabase Auth'ta e-posta değişikliği isteği
+      const { error: authError } = await supabase.auth.updateUser({
+        email: email,
+      });
+      if (authError) throw authError;
+
+      // 3. Supabase Auth kullanıcısını tekrar çek (güncellenmiş durumu almak için)
+      const { data: updatedUserData, error: getUserError } =
+        await supabase.auth.getUser();
+      if (getUserError) throw getUserError;
+
+      const isEmailConfirmed = updatedUserData?.user?.email === email;
+
+      if (isEmailConfirmed) {
+        // 5. Kullanıcılar tablosunu güncelle
+        const { error: dbError } = await supabase
+          .from("kullanicilar")
+          .update({
+            ad_soyad: name,
+            eposta: email,
+          })
+          .eq("id", userData.id);
+
+        if (dbError) throw dbError;
+      } else {
+        // E-posta onaylanmadı, sadece isim güncellenebilir istersen:
+        const { error: dbError } = await supabase
+          .from("kullanicilar")
+          .update({
+            ad_soyad: name,
+          })
+          .eq("id", userData.id);
+
+        if (dbError) throw dbError;
+
+        setSuccess(
+          "E-posta değişikliği için onay maili gönderildi. E-postayı onayladıktan sonra güncelleme tamamlanacaktır."
+        );
+        setIsEditing(false);
+        if (onUpdate) onUpdate({ ...userData, ad_soyad: name });
+        setLoading(false);
+        return; // Burada işlemi sonlandırıyoruz çünkü e-posta henüz onaylanmadı.
+      }
+
+      // 6. Güncelleme başarılı ise kullanıcıya bildir
+      setSuccess("Bilgiler başarıyla güncellendi.");
+      setIsEditing(false);
+      if (onUpdate) onUpdate({ ...userData, ad_soyad: name, eposta: email });
+    } catch (err: any) {
+      setError(err.message || "Güncelleme sırasında hata oluştu.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setName(userData.ad_soyad || "");
+    setEmail(userData.eposta || "");
+    setError(null);
+    setSuccess(null);
+  };
 
   return (
     <Card
@@ -58,12 +147,35 @@ const UserInfoCard: React.FC<Props> = ({ userData }) => {
             <PersonIcon sx={{ fontSize: 32 }} />
           </Avatar>
           <Box>
-            <Typography variant="h5" fontWeight={600} color="#333">
-              {userData.ad_soyad}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {userData.eposta}
-            </Typography>
+            {isEditing ? (
+              <>
+                <TextField
+                  label="İsim"
+                  variant="outlined"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  size="small"
+                  sx={{ mb: 1 }}
+                />
+                <TextField
+                  label="E-posta"
+                  variant="outlined"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  size="small"
+                  type="email"
+                />
+              </>
+            ) : (
+              <>
+                <Typography variant="h5" fontWeight={600} color="#333">
+                  {userData.ad_soyad}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {userData.eposta}
+                </Typography>
+              </>
+            )}
           </Box>
         </Box>
       </Box>
@@ -105,6 +217,43 @@ const UserInfoCard: React.FC<Props> = ({ userData }) => {
           </Typography>
         </Box>
       </CardContent>
+
+      {error && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {success && (
+        <Alert severity="success" sx={{ mt: 2 }}>
+          {success}
+        </Alert>
+      )}
+
+      <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
+        {isEditing ? (
+          <>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSave}
+              disabled={loading}
+            >
+              {loading ? "Kaydediliyor..." : "Kaydet"}
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleCancel}
+              disabled={loading}
+            >
+              İptal
+            </Button>
+          </>
+        ) : (
+          <Button variant="outlined" onClick={() => setIsEditing(true)}>
+            Düzenle
+          </Button>
+        )}
+      </Stack>
     </Card>
   );
 };

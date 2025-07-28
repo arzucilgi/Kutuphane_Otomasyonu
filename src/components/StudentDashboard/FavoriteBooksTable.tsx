@@ -12,22 +12,24 @@ import {
   TablePagination,
   Button,
   Rating,
+  TextField,
 } from "@mui/material";
 import { supabase } from "../../lib/supabaseClient";
 import { fetchUserFavorites } from "../../services/FavoriteService";
 import { fetchAverageRatingByBookId } from "../../services/commentService";
 import type { Kitap } from "../../services/bookTypeService";
-import BookDetailDialog from "../../components/StudentDashboard/BookDetailDialog"; // Modal bileşen yolu (uygunsa düzenle)
+import BookDetailDialog from "../../components/StudentDashboard/BookDetailDialog";
 
 const FavoriteBooksTable: React.FC = () => {
   const [favoriteBooks, setFavoriteBooks] = useState<Kitap[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState(0);
-  const rowsPerPage = 8;
+  const rowsPerPage = 6;
   const [averageRatings, setAverageRatings] = useState<{
     [bookId: string]: number;
   }>({});
   const [selectedKitap, setSelectedKitap] = useState<Kitap | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -60,7 +62,9 @@ const FavoriteBooksTable: React.FC = () => {
 
       const { data, error } = await supabase
         .from("kitaplar")
-        .select("*, yazar: yazar_id (id, isim)")
+        .select(
+          "*, yazar: yazar_id (id, isim) ,kategori:kategori_id(id,ad), raf:raf_id(id, raf_no)"
+        )
         .in("id", favoriteIds);
 
       if (error) {
@@ -69,7 +73,6 @@ const FavoriteBooksTable: React.FC = () => {
       } else {
         setFavoriteBooks(data);
 
-        // Ortalama puanları çek
         const ratings = await Promise.all(
           data.map(async (book) => {
             try {
@@ -95,6 +98,18 @@ const FavoriteBooksTable: React.FC = () => {
     fetchFavorites();
   }, []);
 
+  // Arama filtreleme
+  const filteredBooks = favoriteBooks.filter((book) =>
+    `${book.kitap_adi} ${book.yazar?.isim || ""}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
+  // Arama yapılınca sayfa sıfırlansın
+  useEffect(() => {
+    setPage(0);
+  }, [searchQuery]);
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" mt={5}>
@@ -117,98 +132,126 @@ const FavoriteBooksTable: React.FC = () => {
         p: 3,
         m: 4,
         borderRadius: "16px",
-        // background: "linear-gradient(to bottom right, #e3f2fd, #bbdefb)",
         boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
       }}
     >
-      <Typography
-        variant="h4"
-        gutterBottom
-        color="primary.main"
-        fontWeight={600}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: {
+            xs: "column",
+            sm: "column",
+            md: "row",
+          },
+          justifyContent: "space-between",
+          alignItems: {
+            xs: "flex-start",
+            md: "center",
+          },
+          gap: 2,
+          mb: 3,
+        }}
       >
-        Favori Kitaplarım
-      </Typography>
-      <Table>
-        <TableHead>
-          <TableRow
-            sx={{
-              backgroundColor: "#bbdefb",
-              "& th": {
-                fontWeight: 600,
-                whiteSpace: "nowrap",
-                color: "#777575ff",
-              },
-            }}
-          >
-            <TableCell>Kapak</TableCell>
-            <TableCell>Kitap Adı</TableCell>
-            <TableCell>Yazar</TableCell>
-            <TableCell>Sayfa Sayısı</TableCell>
-            <TableCell>Stok Sayısı</TableCell>
-            <TableCell>Ortalama Puan</TableCell>
-            <TableCell>Detay</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {favoriteBooks
-            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            .map((book) => (
-              <TableRow
-                key={book.id}
-                sx={{
-                  "&:hover": {
-                    backgroundColor: "#e3f2fd",
-                  },
-                }}
-              >
-                <TableCell>
-                  <img
-                    src={book.kapak_url ?? "/placeholder.png"}
-                    alt={book.kitap_adi}
-                    style={{
-                      width: 60,
-                      height: 90,
-                      objectFit: "cover",
-                      borderRadius: 4,
-                      boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                    }}
-                  />
-                </TableCell>
-                <TableCell>{book.kitap_adi}</TableCell>
-                <TableCell>{book.yazar?.isim}</TableCell>
-                <TableCell>{book.sayfa_sayisi ?? "-"}</TableCell>
-                <TableCell>{book.stok_adedi ?? "-"}</TableCell>
-                <TableCell>
-                  <Rating
-                    value={averageRatings[book.id] || 0}
-                    precision={0.5}
-                    readOnly
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="contained"
-                    sx={{
-                      backgroundColor: "#0d47a1",
-                      color: "#fff",
-                      "&:hover": {
-                        backgroundColor: "#1565c0",
-                      },
-                      fontWeight: 600,
-                      fontSize: "0.85rem",
-                      textTransform: "none",
-                    }}
-                    onClick={() => setSelectedKitap(book)}
-                  >
-                    Kitap Detayı
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-        </TableBody>
-      </Table>
+        <Typography variant="h4" color="primary.main" fontWeight={600}>
+          Favori Kitaplarım
+        </Typography>
+
+        <TextField
+          label="Kitap veya Yazar Ara"
+          variant="outlined"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{
+            width: {
+              xs: "100%",
+              sm: "100%",
+              md: "30%",
+            },
+          }}
+        />
+      </Box>
+      <Box sx={{ overflowX: "auto" }}>
+        <Table>
+          <TableHead>
+            <TableRow
+              sx={{
+                backgroundColor: "#bbdefb",
+                "& th": {
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  color: "#777575ff",
+                },
+              }}
+            >
+              <TableCell>Kapak</TableCell>
+              <TableCell>Kitap Adı</TableCell>
+              <TableCell>Yazar</TableCell>
+              <TableCell>Sayfa Sayısı</TableCell>
+              <TableCell>Stok Sayısı</TableCell>
+              <TableCell>Ortalama Puan</TableCell>
+              <TableCell>Detay</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredBooks
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((book) => (
+                <TableRow
+                  key={book.id}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "#e3f2fd",
+                    },
+                  }}
+                >
+                  <TableCell>
+                    <img
+                      src={book.kapak_url ?? "/placeholder.png"}
+                      alt={book.kitap_adi}
+                      style={{
+                        width: 60,
+                        height: 90,
+                        objectFit: "cover",
+                        borderRadius: 4,
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>{book.kitap_adi}</TableCell>
+                  <TableCell>{book.yazar?.isim}</TableCell>
+                  <TableCell>{book.sayfa_sayisi ?? "-"}</TableCell>
+                  <TableCell>{book.stok_adedi ?? "-"}</TableCell>
+                  <TableCell>
+                    <Rating
+                      value={averageRatings[book.id] || 0}
+                      precision={0.5}
+                      readOnly
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "#0d47a1",
+                        color: "#fff",
+                        "&:hover": {
+                          backgroundColor: "#1565c0",
+                        },
+                        fontWeight: 600,
+                        fontSize: "0.85rem",
+                        textTransform: "none",
+                      }}
+                      onClick={() => setSelectedKitap(book)}
+                    >
+                      Kitap Detayı
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </Box>
 
       <BookDetailDialog
         open={!!selectedKitap}
@@ -217,9 +260,9 @@ const FavoriteBooksTable: React.FC = () => {
       />
 
       <TablePagination
-        rowsPerPageOptions={[8]}
+        rowsPerPageOptions={[rowsPerPage]}
         component="div"
-        count={favoriteBooks.length}
+        count={filteredBooks.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
@@ -239,7 +282,6 @@ const FavoriteBooksTable: React.FC = () => {
           "& .MuiTablePagination-select": {
             fontSize: "1.1rem",
           },
-          //İLERİ – GERİ BUTONLARINI BÜYÜTÜR
           "& .MuiIconButton-root": {
             padding: "8px",
             color: "#0d47a1",
