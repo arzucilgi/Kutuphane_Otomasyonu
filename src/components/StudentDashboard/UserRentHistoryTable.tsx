@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   fetchLoggedInUserProfile,
   fetchBooksRentedByUser,
-} from "../../services/userService";
+} from "../../services/StudentServices/userService";
 import {
   Box,
   Typography,
@@ -23,13 +23,13 @@ import {
   Rating,
   TablePagination,
 } from "@mui/material";
-import type { Comment } from "../../services/bookTypeService";
+import type { Comment } from "../../services/StudentServices/bookTypeService";
 import {
   addReview,
   updateReview,
   fetchReviewsByBookId,
   fetchAverageRatingByBookId,
-} from "../../services/commentService";
+} from "../../services/StudentServices/commentService";
 import { toast } from "react-toastify";
 
 interface AggregatedRental {

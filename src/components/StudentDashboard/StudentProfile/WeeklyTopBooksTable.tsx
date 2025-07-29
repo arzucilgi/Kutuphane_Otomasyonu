@@ -11,7 +11,7 @@ import {
   Cell,
 } from "recharts";
 import { Paper, Typography, Box } from "@mui/material";
-import { fetchMostReadBooksThisWeek } from "../../../services/MostReadBooksService";
+import { fetchMostReadBooksThisWeek } from "../../../services/StudentServices/MostReadBooksService";
 
 const WeeklyTopBooksChart = () => {
   const [books, setBooks] = useState<any[]>([]);

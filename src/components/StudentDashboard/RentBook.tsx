@@ -9,7 +9,7 @@ import {
 import { supabase } from "../../lib/supabaseClient";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { rentBookIfAllowed } from "../../services/RentCheckService";
+import { rentBookIfAllowed } from "../../services/StudentServices/RentCheckService";
 
 const RentBookPage: React.FC = () => {
   const navigate = useNavigate();

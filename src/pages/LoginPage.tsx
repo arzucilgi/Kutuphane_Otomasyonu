@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import kutuphaneLogo from "../assets/kütüphane.png";
 import useIfUserExistsRedirectToDashboard from "../hooks/useIfUserExistsRedirectToDashboard";
 import { redirectByRole } from "../lib/redirectByRole";
+import { getUserRoleFromTable } from "../services/StudentServices/getUserRoleFromTable";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -24,7 +25,13 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [success, setSuccess] = useState(false);
+  const [userProfile, setUserProfile] = useState<{
+    rol?: string;
+    gorev?: string;
+  } | null>(null);
+
   const navigate = useNavigate();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -48,26 +55,23 @@ const LoginPage = () => {
       return;
     }
 
-    // Rol bilgisini profilden çek
-    const { data: userProfile, error: profileError } = await supabase
-      .from("kullanicilar") // ya da 'profiles' tablonuzun adı neyse
-      .select("rol")
-      .eq("id", signInData.user.id)
-      .single();
-
-    if (profileError || !userProfile) {
-      setErrorMsg("Kullanıcı rolü alınamadı.");
+    if (!signInData.user) {
+      setErrorMsg("Kullanıcı bulunamadı.");
       setLoading(false);
       return;
     }
 
-    const userRole = userProfile.rol;
+    const userId = signInData.user.id;
+    const userRole = await getUserRoleFromTable(userId); // 👈 merkezi fonksiyonu çağır
 
-    setSuccess(true);
+    if (userRole) {
+      setSuccess(true);
+      setLoading(false);
+      return redirectByRole(userRole, navigate); // 👈 yönlendir
+    }
+
+    setErrorMsg("Kullanıcı rolü alınamadı.");
     setLoading(false);
-
-    // Rol bazlı yönlendirme
-    redirectByRole(userRole, navigate);
   };
 
   return (
@@ -99,7 +103,6 @@ const LoginPage = () => {
               textAlign: "center",
             }}
           >
-            {/* Logo ve Başlık */}
             <Box mb={3}>
               <img
                 src={kutuphaneLogo}
@@ -119,7 +122,6 @@ const LoginPage = () => {
               </Typography>
             </Box>
 
-            {/* Form */}
             <Box component="form" onSubmit={handleSubmit} noValidate>
               <TextField
                 margin="normal"
@@ -128,7 +130,6 @@ const LoginPage = () => {
                 name="email"
                 type="email"
                 value={formData.email}
-                defaultValue={"arzu@example.com"}
                 onChange={handleChange}
                 required
                 sx={{
@@ -140,14 +141,12 @@ const LoginPage = () => {
                   },
                 }}
               />
-
               <TextField
                 margin="normal"
                 fullWidth
                 label="Şifre"
                 name="password"
                 type="password"
-                defaultValue="123456"
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -167,37 +166,27 @@ const LoginPage = () => {
                 </Typography>
               )}
 
-              <Box mt={3}>
+              <Box mt={3} display="flex" justifyContent="center" gap={2}>
                 <Button
                   onClick={() => navigate("/")}
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  disabled={loading}
+                  variant="outlined"
                   sx={{
                     borderRadius: "50px",
-                    // px: 6,
-                    m: 2,
-                    py: 1.8,
+                    m: 1,
+                    py: 1.5,
                     fontWeight: "bold",
-                    fontSize: "1.1rem",
-                    background:
-                      "linear-gradient(45deg, #1a237e 30%, #357ABD 90%)",
-                    boxShadow: "0 3px 5px 2px rgba(53, 122, 189, .3)",
-                    transition: "all 0.3s ease",
+                    fontSize: "1rem",
+                    color: "#1a237e",
+                    borderColor: "#357ABD",
                     "&:hover": {
-                      background:
-                        "linear-gradient(45deg, #283593 30%, #1a237e 90%)",
-                      boxShadow: "0 6px 10px 4px rgba(26, 35, 126, .4)",
+                      borderColor: "#1a237e",
+                      backgroundColor: "rgba(53, 122, 189, 0.1)",
                     },
                   }}
                 >
-                  {loading ? (
-                    <CircularProgress size={24} color="inherit" />
-                  ) : (
-                    "Ana Ekrana Dön"
-                  )}
+                  Ana Ekrana Dön
                 </Button>
+
                 <Button
                   type="submit"
                   variant="contained"

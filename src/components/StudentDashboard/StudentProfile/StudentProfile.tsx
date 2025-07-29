@@ -13,7 +13,7 @@ import {
 import {
   fetchLoggedInUserProfile,
   fetchBooksRentedByUser,
-} from "../../../services/userService";
+} from "../../../services/StudentServices/userService";
 import UserInfoCard from "../StudentProfile/UserInfoCard";
 import RentedBooksTable from "../StudentProfile/RentedBooksTable";
 import ReadingStatsChart from "./ReadingStatsChart";

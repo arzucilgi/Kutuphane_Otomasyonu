@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseClient";
 
 /**
  * Kullanıcının belirtilen kitabı kiralayıp kiralayamayacağını kontrol eder,

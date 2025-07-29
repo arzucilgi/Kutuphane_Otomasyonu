@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import { supabase } from "../../../lib/supabaseClient";
-import { getActiveRentalCount } from "../../../services/RentCheckService";
+import { getActiveRentalCount } from "../../../services/StudentServices/RentCheckService";
 
 interface Props {
   userData: any;

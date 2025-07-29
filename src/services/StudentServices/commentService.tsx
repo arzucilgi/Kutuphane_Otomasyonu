@@ -1,5 +1,5 @@
-import { supabase } from "../lib/supabaseClient";
-import type { Comment } from "../services/bookTypeService";
+import { supabase } from "../../lib/supabaseClient";
+import type { Comment } from "../StudentServices/bookTypeService";
 
 export const fetchReviewsByBookId = async (bookId: string) => {
   const { data, error } = await supabase

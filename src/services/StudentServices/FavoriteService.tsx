@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseClient";
 
 export const toggleFavoriteBook = async (user_id: string, book_id: string) => {
   try {

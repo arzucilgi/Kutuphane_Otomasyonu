@@ -15,9 +15,9 @@ import {
   TextField,
 } from "@mui/material";
 import { supabase } from "../../lib/supabaseClient";
-import { fetchUserFavorites } from "../../services/FavoriteService";
-import { fetchAverageRatingByBookId } from "../../services/commentService";
-import type { Kitap } from "../../services/bookTypeService";
+import { fetchUserFavorites } from "../../services/StudentServices/FavoriteService";
+import { fetchAverageRatingByBookId } from "../../services/StudentServices/commentService";
+import type { Kitap } from "../../services/StudentServices/bookTypeService";
 import BookDetailDialog from "../../components/StudentDashboard/BookDetailDialog";
 
 const FavoriteBooksTable: React.FC = () => {

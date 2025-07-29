@@ -4,7 +4,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import {
   fetchUserReadStats,
   fetchCategories,
-} from "../../../services/categoryService";
+} from "../../../services/StudentServices/categoryService";
 import {
   Box,
   Typography,

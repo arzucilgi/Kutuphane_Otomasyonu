@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
-import type { Kitap } from "../../services/bookTypeService";
+import type { Kitap } from "../../services/StudentServices/bookTypeService";
 import { supabase } from "../../lib/supabaseClient";
 
 interface Comment {
@@ -215,7 +215,7 @@ const BookDetailDialog: React.FC<BookDetailDialogProps> = ({
         <DialogContent dividers>
           {comments.length === 0 ? (
             <Typography variant="body2" align="center">
-              Henüz Yorum YApılmadı!
+              Henüz Yorum Yapılmadı!
             </Typography>
           ) : (
             <List>

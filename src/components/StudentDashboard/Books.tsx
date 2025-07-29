@@ -10,11 +10,9 @@ import {
   FormControl,
   CircularProgress,
   TextField,
-  Dialog,
   IconButton,
   Button,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { styled } from "@mui/system";
@@ -26,7 +24,7 @@ import {
   fetchYayinevleri,
   fetchKitaplar,
   fetchRaflar,
-} from "../../services/bookService";
+} from "../../services/StudentServices/bookService";
 
 import {
   type Tur,
@@ -35,12 +33,12 @@ import {
   type Yayinevi,
   type Kitap,
   type Raf,
-} from "../../services/bookTypeService";
-import { useNavigate } from "react-router-dom";
+} from "../../services/StudentServices/bookTypeService";
+
 import {
   toggleFavoriteBook,
   fetchUserFavorites,
-} from "../../services/FavoriteService";
+} from "../../services/StudentServices/FavoriteService";
 import { supabase } from "../../lib/supabaseClient";
 import BookDetailDialog from "../StudentDashboard/BookDetailDialog";
 
