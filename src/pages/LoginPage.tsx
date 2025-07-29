@@ -18,6 +18,7 @@ import { redirectByRole } from "../lib/redirectByRole";
 import { getUserRoleFromTable } from "../services/StudentServices/getUserRoleFromTable";
 
 const LoginPage = () => {
+  useIfUserExistsRedirectToDashboard();
   const [formData, setFormData] = useState({
     email: "arzu@example.com",
     password: "123456",
@@ -35,8 +36,6 @@ const LoginPage = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
-  useIfUserExistsRedirectToDashboard();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

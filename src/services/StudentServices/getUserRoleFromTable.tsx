@@ -13,6 +13,16 @@ export const getUserRoleFromTable = async (
   if (kullaniciData && !kullaniciError) {
     return kullaniciData.rol;
   }
+  const { data: officerData, error: officerError } = await supabase
+    .from("memurlar")
+    .select("rol")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (officerData && !officerError) {
+    return officerData.rol;
+  }
+
   const { data: yoneticiData, error: yoneticiError } = await supabase
     .from("yoneticiler")
     .select("rol")

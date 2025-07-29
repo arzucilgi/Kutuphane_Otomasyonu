@@ -13,6 +13,11 @@ import RentBook from "./components/StudentDashboard/RentBook";
 import { ToastContainer } from "react-toastify";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import ManagerProfile from "./components/ManagerDashboard/ManagerProfile";
+import AddEmployee from "./components/ManagerDashboard/AddEmployee";
+import OfficerDashboard from "./pages/OfficerDashboard";
+import BookManagement from "./components/OfficerDashboard/BookManagement/BookManagement";
+import BookList from "./components/OfficerDashboard/BookManagement/BookList";
+import AddBook from "./components/OfficerDashboard/BookManagement/AddBook";
 
 function App() {
   return (
@@ -23,7 +28,8 @@ function App() {
         </Route>
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
-        <Route path="/managerDashboard" element={<ManagerDashboard />} />
+        {/* <Route path="/managerDashboard" element={<ManagerDashboard />} />
+        <Route path="/officerDashboard" element={<OfficerDashboard />} /> */}
 
         <Route
           path="/studentDashboard"
@@ -50,6 +56,20 @@ function App() {
         >
           <Route index element={<ManagerProfile />} />
           <Route path="profile" element={<ManagerProfile />} />
+          <Route path="add-employee" element={<AddEmployee />} />
+        </Route>
+        <Route
+          path="/officerDashboard"
+          element={
+            <ProtectedRoute>
+              <OfficerDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="book-management" element={<BookManagement />}>
+            <Route index element={<BookList />} />
+            <Route path="add" element={<AddBook />} />
+          </Route>
         </Route>
       </Routes>
 

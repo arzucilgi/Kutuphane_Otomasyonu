@@ -16,6 +16,21 @@ import { supabase } from "../../lib/supabaseClient";
 import kutuphaneLogo from "../../assets/kütüphane.png";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonIcon from "@mui/icons-material/Person";
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks"; // Kitap işlemleri
+import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd"; // Kitap ekleme
+import EditNoteIcon from "@mui/icons-material/EditNote"; // Kitap düzenleme
+import DeleteIcon from "@mui/icons-material/Delete"; // Kitap silme
+import MenuBookIcon from "@mui/icons-material/MenuBook"; // Raf/Kategori işlemleri
+import PeopleIcon from "@mui/icons-material/People"; // Öğrenciler
+import HistoryEduIcon from "@mui/icons-material/HistoryEdu"; // Kiralama geçmişi
+import WarningAmberIcon from "@mui/icons-material/WarningAmber"; // Ceza işlemleri
+import ChatIcon from "@mui/icons-material/Chat"; // Bilgilendirme/Mesaj
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart"; // Kitap kiralama
+import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn"; // Kitap iade
+import QueryStatsIcon from "@mui/icons-material/QueryStats"; // Raporlar
+import BarChartIcon from "@mui/icons-material/BarChart"; // İstatistik
+import ManageHistoryIcon from "@mui/icons-material/ManageHistory"; // Kiralama yönetimi
+import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle"; // Log / giriş çıkış
 
 const items = [
   {
@@ -24,16 +39,85 @@ const items = [
     to: "profile",
   },
   {
-    label: "Memur Ekle",
-    icon: <PersonAddIcon sx={{ fontSize: "30px", color: "black" }} />,
-    to: "add-employee",
+    label: "Kitap Yönetimi",
+    icon: <LibraryBooksIcon sx={{ fontSize: "30px", color: "black" }} />,
+    to: "book-management",
   },
-
-  //   { label: "Okuduklarım", icon: "📖", to: "readBooks" },
-  //   { label: "Favorilerim", icon: "🌟", to: "recommendations" },
+  //   {
+  //     label: "Kitap Ekle",
+  //     icon: <PlaylistAddIcon sx={{ fontSize: "30px", color: "black" }} />,
+  //     to: "add-book",
+  //   },
+  //   {
+  //     label: "Kitap Düzenle",
+  //     icon: <EditNoteIcon sx={{ fontSize: "30px", color: "black" }} />,
+  //     to: "edit-book",
+  //   },
+  //   {
+  //     label: "Kitap Sil",
+  //     icon: <DeleteIcon sx={{ fontSize: "30px", color: "black" }} />,
+  //     to: "delete-book",
+  //   },
+  //   {
+  //     label: "Raf / Kategori",
+  //     icon: <MenuBookIcon sx={{ fontSize: "30px", color: "black" }} />,
+  //     to: "shelf-category",
+  //   },
+  {
+    label: "Öğrenci İşlemleri",
+    icon: <PeopleIcon sx={{ fontSize: "30px", color: "black" }} />,
+    to: "students",
+  },
+  {
+    label: "Kiralama Geçmişi",
+    icon: <HistoryEduIcon sx={{ fontSize: "30px", color: "black" }} />,
+    to: "rental-history",
+  },
+  {
+    label: "Ceza İşlemleri",
+    icon: <WarningAmberIcon sx={{ fontSize: "30px", color: "black" }} />,
+    to: "penalty-operations",
+  },
+  //   {
+  //     label: "Öğrenciye Mesaj",
+  //     icon: <ChatIcon sx={{ fontSize: "30px", color: "black" }} />,
+  //     to: "send-message",
+  //   },
+  //   {
+  //     label: "Kitap Kirala",
+  //     icon: <ShoppingCartIcon sx={{ fontSize: "30px", color: "black" }} />,
+  //     to: "rent-book",
+  //   },
+  {
+    label: "Kitap İade",
+    icon: <AssignmentReturnIcon sx={{ fontSize: "30px", color: "black" }} />,
+    to: "return-book",
+  },
+  {
+    label: "Kiralama Takibi",
+    icon: <ManageHistoryIcon sx={{ fontSize: "30px", color: "black" }} />,
+    to: "rental-tracking",
+  },
+  {
+    label: "Raporlar",
+    icon: <QueryStatsIcon sx={{ fontSize: "30px", color: "black" }} />,
+    to: "reports",
+  },
+  {
+    label: "İstatistikler",
+    icon: <BarChartIcon sx={{ fontSize: "30px", color: "black" }} />,
+    to: "statistics",
+  },
+  //   {
+  //     label: "Kullanıcı Girişleri",
+  //     icon: (
+  //       <SupervisedUserCircleIcon sx={{ fontSize: "30px", color: "black" }} />
+  //     ),
+  //     to: "user-logs",
+  //   },
 ];
 
-const StudentNavbar = () => {
+const OfficerNavbar = () => {
   const session = useSession();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -43,7 +127,7 @@ const StudentNavbar = () => {
   const userName =
     session?.user?.user_metadata?.ad_soyad ||
     session?.user?.email?.split("@")[0] ||
-    "Öğrenci";
+    "Memur";
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -213,4 +297,4 @@ const StudentNavbar = () => {
   );
 };
 
-export default StudentNavbar;
+export default OfficerNavbar;

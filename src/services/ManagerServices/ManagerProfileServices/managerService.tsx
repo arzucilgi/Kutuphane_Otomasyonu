@@ -1,10 +1,10 @@
 import { supabase } from "../../../lib/supabaseClient";
 
-export const fetchManagerByEmail = async (email: string) => {
+export const fetchManagerByEmail = async (id: string) => {
   const { data, error } = await supabase
     .from("yoneticiler")
     .select("*")
-    .eq("eposta", email)
+    .eq("id", id)
     .single(); // yalnızca tek bir kayıt bekliyoruz
 
   if (error) throw error;
