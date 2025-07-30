@@ -60,7 +60,7 @@ export async function fetchKitaplar(
   let query = supabase
     .from("kitaplar")
     .select(
-      "id, kitap_adi, sayfa_sayisi, stok_adedi, kapak_url, ozet, kategori_id, eklenme_tarihi, yayinevi_id, yazar_id, tur_id, raf_id "
+      "id, kitap_adi, sayfa_sayisi, stok_adedi, kapak_url, ozet, kategori_id, eklenme_tarihi, yayinevi_id, yazar_id, tur_id, raf_id"
     );
 
   if (filter.turId) query = query.eq("tur_id", filter.turId);
@@ -72,3 +72,27 @@ export async function fetchKitaplar(
   if (error) throw error;
   return data ?? [];
 }
+
+// KitapService.ts
+export const createKitap = async (
+  kitap: Partial<Kitap> & { ekleyen_memur_id: string }
+) => {
+  // Supabase veya backend API çağrısı burada yapılır
+  const { data, error } = await supabase
+    .from("kitaplar")
+    .insert([{ ...kitap }]);
+
+  if (error) throw error;
+  return data;
+};
+
+// YazarService.ts
+export const createYazar = async (yeniYazar: { isim: string }) => {
+  const { data, error } = await supabase
+    .from("yazarlar")
+    .insert([yeniYazar])
+    .select("id")
+    .single();
+  if (error) throw error;
+  return data;
+};

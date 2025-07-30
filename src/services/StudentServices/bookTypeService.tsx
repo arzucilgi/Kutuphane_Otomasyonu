@@ -19,7 +19,7 @@ export type Kitap = {
   yazar?: Yazar;
   eklenme_tarihi?: string;
   tur_id?: string;
-  raf_id?: string | null;
+  raf_id?: string;
   raf?: Raf;
 };
 
