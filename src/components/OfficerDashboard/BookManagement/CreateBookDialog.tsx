@@ -5,12 +5,10 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Grid,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
   Button,
+  Autocomplete,
+  Stack,
+  Box,
 } from "@mui/material";
 import {
   fetchKategoriler,
@@ -29,6 +27,7 @@ import type {
   Raf,
 } from "../../../services/StudentServices/bookTypeService";
 import { useUser } from "@supabase/auth-helpers-react";
+import { toast } from "react-toastify";
 
 type Props = {
   open: boolean;
@@ -44,9 +43,9 @@ const CreateBookDialog = ({ open, onClose }: Props) => {
   const [turler, setTurler] = useState<Tur[]>([]);
   const [raflar, setRaflar] = useState<Raf[]>([]);
 
-  const [formData, setFormData] = useState<
-    Partial<Kitap> & { yeniYazar?: string }
-  >({
+  const [filteredRaflar, setFilteredRaflar] = useState<Raf[]>([]);
+
+  const [formData, setFormData] = useState<Partial<Kitap>>({
     kitap_adi: "",
     sayfa_sayisi: undefined,
     stok_adedi: undefined,
@@ -57,7 +56,6 @@ const CreateBookDialog = ({ open, onClose }: Props) => {
     yazar_id: "",
     tur_id: "",
     raf_id: "",
-    yeniYazar: "",
   });
 
   useEffect(() => {
@@ -75,26 +73,57 @@ const CreateBookDialog = ({ open, onClose }: Props) => {
         setYayinevleri(yays);
         setTurler(trs);
         setRaflar(rfs);
+
+        // Başlangıçta tüm raflar gösterilsin
+        setFilteredRaflar(rfs);
       } catch (e) {
         console.error("Veri çekme hatası", e);
       }
     })();
   }, []);
 
+  // Kategori değiştikçe rafları filtrele
+  useEffect(() => {
+    console.log("Kategori ID:", formData.kategori_id);
+    console.log("Tüm Raflar:", raflar);
+
+    if (!formData.kategori_id) {
+      setFilteredRaflar(raflar);
+    } else {
+      const filtreli = raflar.filter((raf) => {
+        console.log(
+          "raf.kategori_id:",
+          raf.kategori_id,
+          "===",
+          formData.kategori_id
+        );
+        return raf.kategori_id?.toString() === formData.kategori_id?.toString();
+      });
+
+      console.log("Filtreli Raflar:", filtreli);
+
+      setFilteredRaflar(filtreli);
+
+      if (!filtreli.find((r) => r.id === formData.raf_id)) {
+        setFormData((prev) => ({ ...prev, raf_id: "" }));
+      }
+    }
+  }, [formData.kategori_id, raflar]);
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
-    try {
-      if (!user) {
-        alert("Lütfen giriş yapınız.");
-        return;
-      }
+    if (!user) {
+      toast.error("Lütfen giriş yapınız.");
+      return;
+    }
 
+    try {
       await createKitap({
         kitap_adi: formData.kitap_adi ?? "",
         sayfa_sayisi: Number(formData.sayfa_sayisi) || 0,
@@ -109,169 +138,164 @@ const CreateBookDialog = ({ open, onClose }: Props) => {
         ekleyen_memur_id: user.id,
       });
 
-      onClose(); // modalı kapat
+      toast.success("Kitap başarıyla eklendi.");
+      onClose();
     } catch (err) {
       console.error("Kitap ekleme hatası", err);
-      alert("Kaydedilemedi");
+      toast.error("Kitap eklenemedi, lütfen tekrar deneyiniz.");
     }
   };
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>Yeni Kitap Ekle</DialogTitle>
-      <DialogContent dividers>
-        <Grid container spacing={2}>
-          <Grid>
+      <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.4rem" }}>
+        📘 Yeni Kitap Ekle
+      </DialogTitle>
+
+      <DialogContent dividers sx={{ bgcolor: "#f9f9f9", py: 3 }}>
+        <Stack spacing={3}>
+          <TextField
+            label="Kitap Adı"
+            name="kitap_adi"
+            value={formData.kitap_adi || ""}
+            onChange={handleChange}
+            fullWidth
+            required
+          />
+
+          <Box display="flex" gap={2}>
             <TextField
-              fullWidth
-              label="Kitap Adı"
-              name="kitap_adi"
-              value={formData.kitap_adi || ""}
-              onChange={handleChange}
-              required
-            />
-          </Grid>
-          <Grid>
-            <TextField
-              fullWidth
               label="Sayfa Sayısı"
               name="sayfa_sayisi"
               type="number"
               value={formData.sayfa_sayisi || ""}
               onChange={handleChange}
-            />
-          </Grid>
-          <Grid>
-            <TextField
               fullWidth
+            />
+            <TextField
               label="Stok Adedi"
               name="stok_adedi"
               type="number"
               value={formData.stok_adedi || ""}
               onChange={handleChange}
-            />
-          </Grid>
-          <Grid>
-            <FormControl fullWidth>
-              <InputLabel>Kategori</InputLabel>
-              <Select
-                name="kategori_id"
-                value={formData.kategori_id || ""}
-                label="Kategori"
-                onChange={handleChange}
-              >
-                {kategoriler.map((k) => (
-                  <MenuItem key={k.id} value={k.id}>
-                    {k.ad}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid>
-            <FormControl fullWidth>
-              <InputLabel>Yayınevi</InputLabel>
-              <Select
-                name="yayinevi_id"
-                value={formData.yayinevi_id || ""}
-                label="Yayınevi"
-                onChange={handleChange}
-              >
-                {yayinevleri.map((y) => (
-                  <MenuItem key={y.id} value={y.id}>
-                    {y.isim}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid>
-            <FormControl fullWidth>
-              <InputLabel>Yazar</InputLabel>
-              <Select
-                name="yazar_id"
-                value={formData.yazar_id || ""}
-                label="Yazar"
-                onChange={handleChange}
-              >
-                <MenuItem value="">Yeni Yazar Gir</MenuItem>
-                {yazarlar.map((y) => (
-                  <MenuItem key={y.id} value={y.id}>
-                    {y.isim}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            {!formData.yazar_id && (
-              <TextField
-                fullWidth
-                label="Yeni Yazar İsmi"
-                name="yeniYazar"
-                value={formData.yeniYazar || ""}
-                onChange={handleChange}
-                sx={{ mt: 1 }}
-              />
-            )}
-          </Grid>
-          <Grid>
-            <FormControl fullWidth>
-              <InputLabel>Tür</InputLabel>
-              <Select
-                name="tur_id"
-                value={formData.tur_id || ""}
-                label="Tür"
-                onChange={handleChange}
-              >
-                {turler.map((t) => (
-                  <MenuItem key={t.id} value={t.id}>
-                    {t.ad}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid>
-            <FormControl fullWidth>
-              <InputLabel>Raf</InputLabel>
-              <Select
-                name="raf_id"
-                value={formData.raf_id || ""}
-                label="Raf"
-                onChange={handleChange}
-              >
-                {raflar.map((r) => (
-                  <MenuItem key={r.id} value={r.id}>
-                    {r.raf_no}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid>
-            <TextField
               fullWidth
-              label="Kapak URL"
-              name="kapak_url"
-              value={formData.kapak_url || ""}
-              onChange={handleChange}
             />
-          </Grid>
-          <Grid>
-            <TextField
+          </Box>
+
+          <Box display="flex" gap={2}>
+            <Autocomplete
+              options={kategoriler}
+              getOptionLabel={(option) => option.ad}
+              value={
+                kategoriler.find((k) => k.id === formData.kategori_id) || null
+              }
+              onChange={(_, value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  kategori_id: value?.id ?? "",
+                  raf_id: "", // Kategori değişince raf seçimi sıfırlanır
+                }))
+              }
+              renderInput={(params) => (
+                <TextField {...params} label="Kategori" />
+              )}
               fullWidth
-              label="Özet"
-              name="ozet"
-              value={formData.ozet || ""}
-              onChange={handleChange}
-              multiline
-              minRows={3}
             />
-          </Grid>
-        </Grid>
+            <Autocomplete
+              options={yayinevleri}
+              getOptionLabel={(option) => option.isim}
+              value={
+                yayinevleri.find((y) => y.id === formData.yayinevi_id) || null
+              }
+              onChange={(_, value) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  yayinevi_id: value?.id ?? "",
+                }));
+              }}
+              renderInput={(params) => (
+                <TextField {...params} label="Yayınevi" />
+              )}
+              fullWidth
+            />
+          </Box>
+
+          <Box display="flex" gap={2}>
+            <Autocomplete
+              options={yazarlar}
+              getOptionLabel={(option) => option.isim}
+              onChange={(_, value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  yazar_id: value?.id ?? "",
+                }))
+              }
+              renderInput={(params) => <TextField {...params} label="Yazar" />}
+              fullWidth
+            />
+            <Autocomplete
+              options={turler}
+              getOptionLabel={(option) => option.ad}
+              onChange={(_, value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  tur_id: value?.id ?? "",
+                }))
+              }
+              renderInput={(params) => <TextField {...params} label="Tür" />}
+              fullWidth
+            />
+          </Box>
+
+          <Autocomplete
+            options={filteredRaflar}
+            getOptionLabel={(option) => option.raf_no}
+            value={filteredRaflar.find((r) => r.id === formData.raf_id) || null}
+            onChange={(_, value) =>
+              setFormData((prev) => ({
+                ...prev,
+                raf_id: value?.id ?? "",
+              }))
+            }
+            renderInput={(params) => <TextField {...params} label="Raf" />}
+            fullWidth
+          />
+
+          <TextField
+            label="Kapak URL"
+            name="kapak_url"
+            value={formData.kapak_url || ""}
+            onChange={handleChange}
+            fullWidth
+          />
+
+          <TextField
+            label="Özet"
+            name="ozet"
+            value={formData.ozet || ""}
+            onChange={handleChange}
+            multiline
+            minRows={4}
+            fullWidth
+          />
+        </Stack>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>İptal</Button>
-        <Button onClick={handleSubmit} variant="contained">
+
+      <DialogActions sx={{ p: 2 }}>
+        <Button onClick={onClose} variant="outlined" color="primary">
+          İptal
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          sx={{
+            backgroundColor: " #4caf50",
+            color: "#fff",
+            "&:hover": {
+              backgroundColor: "#64dd17",
+            },
+          }}
+        >
           Kaydet
         </Button>
       </DialogActions>

@@ -13,6 +13,9 @@ import {
   Box,
 } from "@mui/material";
 import { supabase } from "../../../lib/supabaseClient";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface Props {
   open: boolean;
@@ -235,6 +238,32 @@ const CreatePublisherDialog: React.FC<Props> = ({ open, onClose }) => {
       setEditValue(yayınevi.isim);
     }
   };
+  const actionButtons = [
+    {
+      key: "create",
+      label: "Ekle",
+      icon: <AddIcon />,
+      bg: "#e3f2fd",
+      hover: "#35a1f9ff",
+      color: "#1976d2",
+    },
+    {
+      key: "update",
+      label: "Güncelle",
+      icon: <EditIcon />,
+      bg: "#fff3e0",
+      hover: "#ffc743ff",
+      color: "#ef6c00",
+    },
+    {
+      key: "delete",
+      label: "Sil",
+      icon: <DeleteIcon />,
+      bg: "#fdecea",
+      hover: "#e3514eff",
+      color: "#d32f2f",
+    },
+  ];
 
   return (
     <>
@@ -245,33 +274,31 @@ const CreatePublisherDialog: React.FC<Props> = ({ open, onClose }) => {
             {feedback && <Alert severity={feedback.type}>{feedback.msg}</Alert>}
 
             <Stack direction="row" spacing={1}>
-              <Button
-                onClick={() => {
-                  clearForm();
-                  setMode("create");
-                }}
-                variant={mode === "create" ? "contained" : "outlined"}
-              >
-                Ekle
-              </Button>
-              <Button
-                onClick={() => {
-                  clearForm();
-                  setMode("update");
-                }}
-                variant={mode === "update" ? "contained" : "outlined"}
-              >
-                Güncelle
-              </Button>
-              <Button
-                onClick={() => {
-                  clearForm();
-                  setMode("delete");
-                }}
-                variant={mode === "delete" ? "contained" : "outlined"}
-              >
-                Sil
-              </Button>
+              {actionButtons.map((action) => (
+                <Button
+                  key={action.key}
+                  onClick={() => {
+                    clearForm();
+                    setMode(action.key as any);
+                  }}
+                  variant={mode === action.key ? "contained" : "outlined"}
+                  startIcon={action.icon}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    minWidth: 130,
+                    backgroundColor:
+                      mode === action.key ? action.hover : action.bg,
+                    color: mode === action.key ? "#fff" : action.color,
+                    "&:hover": {
+                      backgroundColor: action.hover,
+                      color: "#fff",
+                    },
+                  }}
+                >
+                  {action.label}
+                </Button>
+              ))}
             </Stack>
 
             {(mode === "update" || mode === "delete") && (
@@ -315,6 +342,7 @@ const CreatePublisherDialog: React.FC<Props> = ({ open, onClose }) => {
               onClick={handleCreate}
               variant="contained"
               disabled={loading}
+              color="primary"
             >
               Ekle
             </Button>
@@ -324,6 +352,7 @@ const CreatePublisherDialog: React.FC<Props> = ({ open, onClose }) => {
               onClick={handleUpdate}
               variant="contained"
               disabled={loading || !selectedId}
+              color="warning"
             >
               Güncelle
             </Button>
@@ -331,7 +360,7 @@ const CreatePublisherDialog: React.FC<Props> = ({ open, onClose }) => {
           {mode === "delete" && (
             <Button
               onClick={handleDelete}
-              variant="outlined"
+              variant="contained"
               color="error"
               disabled={loading || !selectedId}
             >

@@ -5,13 +5,16 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Button,
   Stack,
   Autocomplete,
   Alert,
   Typography,
   Box,
+  Button,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { supabase } from "../../../lib/supabaseClient";
 
 interface Props {
@@ -24,40 +27,10 @@ interface Kategori {
   ad: string;
 }
 
-interface ConfirmDialogProps {
-  open: boolean;
-  title?: string;
-  message: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
-
-const ConfirmDialog = ({
-  open,
-  title,
-  message,
-  onConfirm,
-  onCancel,
-}: ConfirmDialogProps) => (
-  <Dialog open={open} onClose={onCancel}>
-    {title && <DialogTitle>{title}</DialogTitle>}
-    <DialogContent>
-      <Typography>{message}</Typography>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={onCancel}>Hayır</Button>
-      <Button onClick={onConfirm} color="primary" variant="contained">
-        Evet
-      </Button>
-    </DialogActions>
-  </Dialog>
-);
-
 const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
   const [mode, setMode] = useState<"none" | "create" | "update" | "delete">(
     "none"
   );
-
   const [kategoriAdi, setKategoriAdi] = useState("");
   const [kategoriler, setKategoriler] = useState<Kategori[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -68,7 +41,6 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
     msg: string;
   } | null>(null);
 
-  // Confirm dialog state ve callback
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
   const [confirmCallback, setConfirmCallback] = useState<() => void>(() => {});
@@ -78,7 +50,6 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
     setEditValue("");
     setSelectedId(null);
     setMode("none");
-    // setFeedback(null);
   };
 
   const fetchKategoriler = async () => {
@@ -86,11 +57,8 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
       .from("kategoriler")
       .select("*")
       .order("ad");
-    if (!error && data) {
-      setKategoriler(data);
-    } else if (error) {
-      setFeedback({ type: "error", msg: error.message });
-    }
+    if (!error && data) setKategoriler(data);
+    else if (error) setFeedback({ type: "error", msg: error.message });
   };
 
   useEffect(() => {
@@ -100,7 +68,6 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
     }
   }, [open]);
 
-  // Confirm dialogu açma fonksiyonu
   const openConfirm = (message: string, callback: () => void) => {
     setConfirmMessage(message);
     setConfirmCallback(() => () => {
@@ -109,8 +76,6 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
     });
     setConfirmOpen(true);
   };
-
-  // CRUD işlemleri
 
   const handleCreate = () => {
     if (!kategoriAdi.trim()) {
@@ -122,11 +87,9 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
       "Bu kategoriyi eklemek istediğinize emin misiniz?",
       async () => {
         setLoading(true);
-
         const { error } = await supabase
           .from("kategoriler")
           .insert({ ad: kategoriAdi.trim() });
-
         setLoading(false);
 
         if (error) {
@@ -153,12 +116,10 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
       "Bu kategoriyi güncellemek istediğinize emin misiniz?",
       async () => {
         setLoading(true);
-
         const { error } = await supabase
           .from("kategoriler")
           .update({ ad: editValue.trim() })
           .eq("id", selectedId);
-
         setLoading(false);
 
         if (error) {
@@ -182,50 +143,34 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
     }
 
     setLoading(true);
-
-    // 1. Bu kategoriye bağlı kitap var mı?
-    const { data: kitaplar, error: kitapError } = await supabase
+    const { data: kitaplar } = await supabase
       .from("kitaplar")
       .select("id")
       .eq("kategori_id", selectedId);
-
-    if (kitapError) {
-      setLoading(false);
-      setFeedback({ type: "error", msg: "Kitap kontrolü yapılamadı." });
-      return;
-    }
 
     if (kitaplar && kitaplar.length > 0) {
       setLoading(false);
       setFeedback({
         type: "error",
-        msg: "Bu kategoriye ait kitaplar var. Lütfen önce o kitapları silin veya taşıyın.",
+        msg: "Bu kategoriye ait kitaplar var. Önce o kitapları silin veya taşıyın.",
       });
       return;
     }
 
-    // 2. Bu kategoriye bağlı raf var mı?
-    const { data: raflar, error: rafError } = await supabase
+    const { data: raflar } = await supabase
       .from("raflar")
       .select("id")
-      .eq("kategori_id", selectedId); // Eğer kategori_id yoksa bu kısmı kaldırabilirsin
-
-    if (rafError) {
-      setLoading(false);
-      setFeedback({ type: "error", msg: "Raf kontrolü yapılamadı." });
-      return;
-    }
+      .eq("kategori_id", selectedId);
 
     if (raflar && raflar.length > 0) {
       setLoading(false);
       setFeedback({
         type: "error",
-        msg: "Bu kategoriye bağlı raflar var. Önce rafları silmelisiniz.",
+        msg: "Bu kategoriye bağlı raflar var. Önce rafları silin.",
       });
       return;
     }
 
-    // 3. Silme onayı
     setLoading(false);
     openConfirm("Bu kategoriyi silmek istediğinize emin misiniz?", async () => {
       setLoading(true);
@@ -245,7 +190,6 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
     });
   };
 
-  // Seçim değişimi
   const handleKategoriChange = (id: string | null) => {
     if (!id) {
       clearForm();
@@ -258,6 +202,33 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
     }
   };
 
+  const actionButtons = [
+    {
+      key: "create",
+      label: "Ekle",
+      icon: <AddIcon />,
+      bg: "#e3f2fd",
+      hover: "#35a1f9ff",
+      color: "#1976d2",
+    },
+    {
+      key: "update",
+      label: "Güncelle",
+      icon: <EditIcon />,
+      bg: "#fff3e0",
+      hover: "#ffc743ff",
+      color: "#ef6c00",
+    },
+    {
+      key: "delete",
+      label: "Sil",
+      icon: <DeleteIcon />,
+      bg: "#fdecea",
+      hover: "#e3514eff",
+      color: "#d32f2f",
+    },
+  ];
+
   return (
     <>
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -267,33 +238,31 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
             {feedback && <Alert severity={feedback.type}>{feedback.msg}</Alert>}
 
             <Stack direction="row" spacing={1}>
-              <Button
-                onClick={() => {
-                  clearForm();
-                  setMode("create");
-                }}
-                variant={mode === "create" ? "contained" : "outlined"}
-              >
-                Ekle
-              </Button>
-              <Button
-                onClick={() => {
-                  clearForm();
-                  setMode("update");
-                }}
-                variant={mode === "update" ? "contained" : "outlined"}
-              >
-                Güncelle
-              </Button>
-              <Button
-                onClick={() => {
-                  clearForm();
-                  setMode("delete");
-                }}
-                variant={mode === "delete" ? "contained" : "outlined"}
-              >
-                Sil
-              </Button>
+              {actionButtons.map((action) => (
+                <Button
+                  key={action.key}
+                  onClick={() => {
+                    clearForm();
+                    setMode(action.key as any);
+                  }}
+                  variant={mode === action.key ? "contained" : "outlined"}
+                  startIcon={action.icon}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    minWidth: 130,
+                    backgroundColor:
+                      mode === action.key ? action.hover : action.bg,
+                    color: mode === action.key ? "#fff" : action.color,
+                    "&:hover": {
+                      backgroundColor: action.hover,
+                      color: "#fff",
+                    },
+                  }}
+                >
+                  {action.label}
+                </Button>
+              ))}
             </Stack>
 
             {(mode === "update" || mode === "delete") && (
@@ -322,7 +291,6 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
                     : setEditValue(e.target.value)
                 }
                 fullWidth
-                sx={{ mt: 1 }}
               />
             )}
           </Stack>
@@ -337,6 +305,7 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
               onClick={handleCreate}
               variant="contained"
               disabled={loading}
+              color="primary"
             >
               Ekle
             </Button>
@@ -346,6 +315,7 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
               onClick={handleUpdate}
               variant="contained"
               disabled={loading || !selectedId}
+              color="warning"
             >
               Güncelle
             </Button>
@@ -353,7 +323,7 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
           {mode === "delete" && (
             <Button
               onClick={handleDelete}
-              variant="outlined"
+              variant="contained"
               color="error"
               disabled={loading || !selectedId}
             >
@@ -364,12 +334,18 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, onClose }) => {
       </Dialog>
 
       {/* Confirm Dialog */}
-      <ConfirmDialog
-        open={confirmOpen}
-        message={confirmMessage}
-        onConfirm={confirmCallback}
-        onCancel={() => setConfirmOpen(false)}
-      />
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+        <DialogTitle>Onay</DialogTitle>
+        <DialogContent>
+          <Typography>{confirmMessage}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)}>Hayır</Button>
+          <Button onClick={confirmCallback} variant="contained">
+            Evet
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

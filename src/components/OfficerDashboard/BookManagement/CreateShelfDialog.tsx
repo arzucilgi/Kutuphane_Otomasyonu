@@ -17,6 +17,9 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface Props {
   open: boolean;
@@ -258,6 +261,33 @@ const ShelfManagerDialog = ({ open, onClose }: Props) => {
     });
   };
 
+  const actionButtons = [
+    {
+      key: "create",
+      label: "Ekle",
+      icon: <AddIcon />,
+      bg: "#e3f2fd",
+      hover: "#35a1f9ff",
+      color: "#1976d2",
+    },
+    {
+      key: "update",
+      label: "Güncelle",
+      icon: <EditIcon />,
+      bg: "#fff3e0",
+      hover: "#ffc743ff",
+      color: "#ef6c00",
+    },
+    {
+      key: "delete",
+      label: "Sil",
+      icon: <DeleteIcon />,
+      bg: "#fdecea",
+      hover: "#e3514eff",
+      color: "#d32f2f",
+    },
+  ];
+
   return (
     <>
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -268,30 +298,31 @@ const ShelfManagerDialog = ({ open, onClose }: Props) => {
             {loading && <CircularProgress size={24} />}
 
             <Stack direction="row" spacing={1}>
-              <Button
-                onClick={() => {
-                  clearForm();
-                  setMode("create");
-                }}
-                variant={mode === "create" ? "contained" : "outlined"}
-                disabled={loading}
-              >
-                Ekle
-              </Button>
-              <Button
-                onClick={() => setMode("update")}
-                variant={mode === "update" ? "contained" : "outlined"}
-                disabled={loading}
-              >
-                Güncelle
-              </Button>
-              <Button
-                onClick={() => setMode("delete")}
-                variant={mode === "delete" ? "contained" : "outlined"}
-                disabled={loading}
-              >
-                Sil
-              </Button>
+              {actionButtons.map((action) => (
+                <Button
+                  key={action.key}
+                  onClick={() => {
+                    clearForm();
+                    setMode(action.key as any);
+                  }}
+                  variant={mode === action.key ? "contained" : "outlined"}
+                  startIcon={action.icon}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    minWidth: 130,
+                    backgroundColor:
+                      mode === action.key ? action.hover : action.bg,
+                    color: mode === action.key ? "#fff" : action.color,
+                    "&:hover": {
+                      backgroundColor: action.hover,
+                      color: "#fff",
+                    },
+                  }}
+                >
+                  {action.label}
+                </Button>
+              ))}
             </Stack>
 
             {(mode === "update" || mode === "delete") && (
@@ -364,6 +395,7 @@ const ShelfManagerDialog = ({ open, onClose }: Props) => {
               onClick={handleCreate}
               variant="contained"
               disabled={loading}
+              color="primary"
             >
               Ekle
             </Button>
@@ -373,6 +405,7 @@ const ShelfManagerDialog = ({ open, onClose }: Props) => {
               onClick={handleUpdate}
               variant="contained"
               disabled={loading}
+              color="warning"
             >
               Güncelle
             </Button>
@@ -380,7 +413,7 @@ const ShelfManagerDialog = ({ open, onClose }: Props) => {
           {mode === "delete" && selectedId && (
             <Button
               onClick={handleDelete}
-              variant="outlined"
+              variant="contained"
               color="error"
               disabled={loading}
             >

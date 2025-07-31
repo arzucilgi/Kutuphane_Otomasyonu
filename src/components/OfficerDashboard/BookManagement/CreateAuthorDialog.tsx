@@ -12,6 +12,9 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface Props {
   open: boolean;
@@ -46,8 +49,10 @@ const ConfirmDialog = ({
       <Typography>{message}</Typography>
     </DialogContent>
     <DialogActions>
-      <Button onClick={onCancel}>Hayır</Button>
-      <Button onClick={onConfirm} color="primary" variant="contained">
+      <Button onClick={onCancel} variant="outlined" color="inherit">
+        Hayır
+      </Button>
+      <Button onClick={onConfirm} color="error" variant="contained">
         Evet
       </Button>
     </DialogActions>
@@ -72,7 +77,6 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
     msg: string;
   } | null>(null);
 
-  // Confirm dialog kontrolü
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
   const [confirmCallback, setConfirmCallback] = useState<() => void>(() => {});
@@ -106,7 +110,6 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
     }
   }, [open]);
 
-  // Confirm dialogu açma fonksiyonu
   const openConfirm = (message: string, callback: () => void) => {
     setConfirmMessage(message);
     setConfirmCallback(() => () => {
@@ -115,8 +118,6 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
     });
     setConfirmOpen(true);
   };
-
-  // CRUD işlemleri fonksiyonları, confirm dialog ile kontrol edilecek
 
   const handleCreate = () => {
     if (!form.ad || !form.soyad) {
@@ -172,7 +173,6 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
   const handleDelete = async () => {
     if (!selectedId) return;
 
-    // Önce yazarın kitaplarını kontrol et
     const { data: kitaplar, error: kitapError } = await supabase
       .from("kitaplar")
       .select("id")
@@ -191,13 +191,11 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
       return;
     }
 
-    // Eğer kitap yoksa, silme için onay al
     openConfirm("Bu yazarı silmek istediğinize emin misiniz?", async () => {
       const { error } = await supabase
         .from("yazarlar")
         .delete()
         .eq("id", selectedId);
-
       if (error) {
         setFeedback({ type: "error", msg: error.message });
       } else {
@@ -225,47 +223,72 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
   return (
     <>
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-        <DialogTitle>Yazar İşlemleri</DialogTitle>
+        <DialogTitle sx={{ fontWeight: "bold" }}>Yazar İşlemleri</DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1}>
             {feedback && <Alert severity={feedback.type}>{feedback.msg}</Alert>}
 
-            <Stack direction="row" spacing={1}>
-              <Button
-                onClick={() => setMode("create")}
-                variant={mode === "create" ? "contained" : "outlined"}
-              >
-                Ekle
-              </Button>
-              <Button
-                onClick={() => setMode("update")}
-                variant={mode === "update" ? "contained" : "outlined"}
-              >
-                Güncelle
-              </Button>
-              <Button
-                onClick={() => setMode("delete")}
-                variant={mode === "delete" ? "contained" : "outlined"}
-              >
-                Sil
-              </Button>
+            <Stack direction="row" spacing={2}>
+              {[
+                {
+                  key: "create",
+                  label: "Ekle",
+                  icon: <AddIcon />,
+                  bg: "#e3f2fd",
+                  hover: "#35a1f9ff",
+                  color: "#1976d2",
+                },
+                {
+                  key: "update",
+                  label: "Güncelle",
+                  icon: <EditIcon />,
+                  bg: "#fff3e0",
+                  hover: "#ffc743ff",
+                  color: "#ef6c00",
+                },
+                {
+                  key: "delete",
+                  label: "Sil",
+                  icon: <DeleteIcon />,
+                  bg: "#fdecea",
+                  hover: "#e3514eff",
+                  color: "#d32f2f",
+                },
+              ].map((action) => (
+                <Button
+                  key={action.key}
+                  onClick={() => setMode(action.key as any)}
+                  variant={mode === action.key ? "contained" : "outlined"}
+                  startIcon={action.icon}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    minWidth: 130,
+                    backgroundColor:
+                      mode === action.key ? action.hover : action.bg,
+                    color: mode === action.key ? "#fff" : action.color,
+                    "&:hover": {
+                      backgroundColor: action.hover,
+                      color: "#fff",
+                    },
+                  }}
+                >
+                  {action.label}
+                </Button>
+              ))}
             </Stack>
 
             {(mode === "update" || mode === "delete") && (
               <Autocomplete
                 options={yazarlar}
                 getOptionLabel={(option) => option.isim}
-                filterSelectedOptions
                 value={yazarlar.find((y) => y.id === selectedId) || null}
                 onChange={(_, newValue) => {
-                  if (newValue) {
-                    handleYazarChange(newValue.id);
-                  } else {
-                    setSelectedId("");
-                  }
+                  if (newValue) handleYazarChange(newValue.id);
+                  else setSelectedId("");
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} label="Yazar Seç / Ara" />
+                  <TextField {...params} label="Yazar Seç / Ara" fullWidth />
                 )}
               />
             )}
@@ -278,6 +301,7 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, ad: e.target.value }))
                   }
+                  fullWidth
                 />
                 <TextField
                   label="Soyad"
@@ -285,6 +309,7 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, soyad: e.target.value }))
                   }
+                  fullWidth
                 />
                 <TextField
                   label="Özgeçmiş"
@@ -294,6 +319,7 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, ozgecmis: e.target.value }))
                   }
+                  fullWidth
                 />
                 <TextField
                   label="Profil Resmi URL"
@@ -301,33 +327,35 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, profil: e.target.value }))
                   }
+                  fullWidth
                 />
               </>
             )}
           </Stack>
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={onClose}>Kapat</Button>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={onClose} color="inherit" variant="text">
+            Kapat
+          </Button>
           {mode === "create" && (
-            <Button onClick={handleCreate} variant="contained">
-              Ekle
+            <Button onClick={handleCreate} variant="contained" color="primary">
+              Kaydet
             </Button>
           )}
           {mode === "update" && selectedId && (
-            <Button onClick={handleUpdate} variant="contained">
+            <Button onClick={handleUpdate} variant="contained" color="warning">
               Güncelle
             </Button>
           )}
           {mode === "delete" && selectedId && (
-            <Button onClick={handleDelete} variant="outlined" color="error">
+            <Button onClick={handleDelete} variant="contained" color="error">
               Sil
             </Button>
           )}
         </DialogActions>
       </Dialog>
 
-      {/* Confirm Dialog */}
       <ConfirmDialog
         open={confirmOpen}
         message={confirmMessage}

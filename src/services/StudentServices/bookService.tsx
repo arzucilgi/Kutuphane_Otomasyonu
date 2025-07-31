@@ -38,13 +38,14 @@ export async function fetchYayinevleri(): Promise<Yayinevi[]> {
 }
 
 // Rafları getir
-export async function fetchRaflar(): Promise<Raf[]> {
-  const { data, error } = await supabase.from("raflar").select("id, raf_no");
-  if (error) throw error;
-  console.log("rafDAta", data);
+export const fetchRaflar = async (): Promise<Raf[]> => {
+  const { data, error } = await supabase
+    .from("raflar")
+    .select("id, raf_no, kategori_id"); // kategori_id mutlaka burada olsun
 
-  return data ?? [];
-}
+  if (error) throw error;
+  return data || [];
+};
 
 // Kitapları filtreleyerek getir
 type KitapFilter = {
@@ -95,4 +96,36 @@ export const createYazar = async (yeniYazar: { isim: string }) => {
     .single();
   if (error) throw error;
   return data;
+};
+
+export const updateKitap = async (kitap: Kitap) => {
+  const { data, error } = await supabase
+    .from("kitaplar")
+    .update({
+      kitap_adi: kitap.kitap_adi,
+      sayfa_sayisi: kitap.sayfa_sayisi,
+      stok_adedi: kitap.stok_adedi,
+      kapak_url: kitap.kapak_url,
+      ozet: kitap.ozet,
+      kategori_id: kitap.kategori_id,
+      yayinevi_id: kitap.yayinevi_id,
+      yazar_id: kitap.yazar_id,
+      tur_id: kitap.tur_id,
+      raf_id: kitap.raf_id,
+    })
+    .eq("id", kitap.id); // id'si eşleşen kitabı güncelle
+
+  if (error) {
+    throw new Error("Kitap güncellenemedi: " + error.message);
+  }
+
+  return data;
+};
+
+export const deleteKitap = async (id: string) => {
+  const { error } = await supabase.from("kitaplar").delete().eq("id", id);
+
+  if (error) {
+    throw new Error("Kitap silinemedi: " + error.message);
+  }
 };
