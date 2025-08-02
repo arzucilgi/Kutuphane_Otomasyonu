@@ -43,26 +43,6 @@ const items = [
     icon: <LibraryBooksIcon sx={{ fontSize: "30px", color: "black" }} />,
     to: "book-management",
   },
-  //   {
-  //     label: "Kitap Ekle",
-  //     icon: <PlaylistAddIcon sx={{ fontSize: "30px", color: "black" }} />,
-  //     to: "add-book",
-  //   },
-  //   {
-  //     label: "Kitap Düzenle",
-  //     icon: <EditNoteIcon sx={{ fontSize: "30px", color: "black" }} />,
-  //     to: "edit-book",
-  //   },
-  //   {
-  //     label: "Kitap Sil",
-  //     icon: <DeleteIcon sx={{ fontSize: "30px", color: "black" }} />,
-  //     to: "delete-book",
-  //   },
-  //   {
-  //     label: "Raf / Kategori",
-  //     icon: <MenuBookIcon sx={{ fontSize: "30px", color: "black" }} />,
-  //     to: "shelf-category",
-  //   },
   {
     label: "Öğrenci İşlemleri",
     icon: <PeopleIcon sx={{ fontSize: "30px", color: "black" }} />,

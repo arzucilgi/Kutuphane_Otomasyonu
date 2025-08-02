@@ -20,6 +20,7 @@ import BookList from "./components/OfficerDashboard/BookManagement/BookList";
 import AddBook from "./components/OfficerDashboard/BookManagement/AddBook";
 import CreateBookDialog from "./components/OfficerDashboard/BookManagement/CreateBookDialog";
 import { useState } from "react";
+import StudentListPage from "./components/OfficerDashboard/RentalHistoryManagement/StudentListPage";
 
 function App() {
   return (
@@ -70,8 +71,8 @@ function App() {
         >
           <Route path="book-management" element={<BookManagement />}>
             <Route index element={<BookList />} />
-            {/* <Route path="add" element={<CreateBookDialog />} /> */}
           </Route>
+          <Route path="students" element={<StudentListPage />} />
         </Route>
       </Routes>
 

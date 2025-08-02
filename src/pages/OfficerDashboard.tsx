@@ -19,7 +19,7 @@ const OfficerDashboard = () => {
         sx={{
           flex: 1, // Navbar dışındaki alanı kapla
           overflowY: "auto",
-          backgroundColor: "blue",
+          // backgroundColor: "blue",
         }}
       >
         <Outlet />

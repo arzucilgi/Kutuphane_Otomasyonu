@@ -14,6 +14,7 @@ import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import kutuphaneLogo from "../assets/kütüphane.png";
 import useIfUserExistsRedirectToDashboard from "../hooks/useIfUserExistsRedirectToDashboard";
+import { registerUser } from "../services/authService";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -26,8 +27,6 @@ const Register = () => {
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
-  useIfUserExistsRedirectToDashboard();
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -37,52 +36,23 @@ const Register = () => {
     setErrorMsg("");
     setLoading(true);
 
-    // 1. Supabase auth ile kullanıcı oluştur
-    const { data, error } = await supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password,
-      options: {
-        data: {
-          ad_soyad: formData.ad_soyad,
-          rol: "ogrenci",
-        },
-      },
-    });
+    const result = await registerUser(
+      formData.ad_soyad,
+      formData.email,
+      formData.password
+    );
 
-    if (error) {
-      setErrorMsg(error.message);
+    if (!result.success) {
+      setErrorMsg(result.message || "Bilinmeyen bir hata oluştu.");
       setLoading(false);
       return;
     }
 
-    // 2. Kullanıcı oluşturulduysa kendi 'kullanicilar' tablosuna ekle
-    if (data.user) {
-      const { error: insertError } = await supabase
-        .from("kullanicilar")
-        .insert([
-          {
-            id: data.user.id, // uuid user id olarak
-            ad_soyad: formData.ad_soyad,
-            eposta: formData.email,
-            rol: "ogrenci",
-          },
-        ]);
-
-      if (insertError) {
-        setErrorMsg(
-          "Kayıt başarılı ancak veritabanına eklenirken hata oluştu."
-        );
-        setLoading(false);
-        return;
-      }
-
-      setSuccess(true);
-      setLoading(false);
-
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
-    }
+    setSuccess(true);
+    setLoading(false);
+    setTimeout(() => {
+      navigate("/login");
+    }, 2000);
   };
 
   return (
