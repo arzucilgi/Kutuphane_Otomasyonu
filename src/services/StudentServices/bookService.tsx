@@ -129,3 +129,14 @@ export const deleteKitap = async (id: string) => {
     throw new Error("Kitap silinemedi: " + error.message);
   }
 };
+
+export async function fetchKitapById(id: string): Promise<Kitap | null> {
+  const { data, error } = await supabase
+    .from("kitaplar")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) return null;
+  return data;
+}

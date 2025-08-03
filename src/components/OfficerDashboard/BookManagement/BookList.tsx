@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import EditDocumentIcon from "@mui/icons-material/EditDocument";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { History } from "@mui/icons-material";
 
 import {
   fetchKitaplar,
@@ -40,6 +41,7 @@ import type {
   Tur,
   Raf,
 } from "../../../services/StudentServices/bookTypeService";
+import { useNavigate } from "react-router-dom";
 
 // component
 const BookList = () => {
@@ -60,6 +62,7 @@ const BookList = () => {
   const [selectedKitap, setSelectedKitap] = useState<Kitap | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [kitapToDelete, setKitapToDelete] = useState<Kitap | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getData = async () => {
@@ -183,13 +186,24 @@ const BookList = () => {
     {
       field: "actions",
       headerName: "İşlemler",
-      width: 140,
+      width: 190,
       sortable: false,
       filterable: false,
       align: "center",
       headerAlign: "center",
       renderCell: (params: GridRenderCellParams) => (
         <Stack direction="row" spacing={3} m={1}>
+          <Tooltip title="Kiralama Geçmişi">
+            <IconButton
+              color="primary"
+              onClick={() =>
+                navigate(`/officerDashboard/rental-history/${params.id}`)
+              }
+              size="small"
+            >
+              <History />
+            </IconButton>
+          </Tooltip>
           <Tooltip title="Düzenle">
             <IconButton
               size="small"
