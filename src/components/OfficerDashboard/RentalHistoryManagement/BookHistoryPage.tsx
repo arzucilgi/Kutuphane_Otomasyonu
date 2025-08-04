@@ -4,18 +4,19 @@ import {
   CardContent,
   Typography,
   CircularProgress,
-  Grid,
-  Alert,
   Box,
   Divider,
   Button,
   useTheme,
   Fade,
   Stack,
+  Alert,
 } from "@mui/material";
 import { supabase } from "../../../lib/supabaseClient";
 import type { Kiralama } from "../../../services/StudentServices/bookTypeService";
 import ConfirmDialog from "../../../components/OfficerDashboard/StudentManagement/ConfirmDialog";
+
+const ITEMS_PER_PAGE = 6;
 
 const BookHistoryPage: React.FC = () => {
   const [rentals, setRentals] = useState<Kiralama[]>([]);
@@ -24,6 +25,7 @@ const BookHistoryPage: React.FC = () => {
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [page, setPage] = useState(0);
   const theme = useTheme();
 
   const fetchUndeliveredBooks = async () => {
@@ -39,6 +41,7 @@ const BookHistoryPage: React.FC = () => {
         teslim_edilme_tarihi,
         son_teslim_tarihi,
         kitap_id,
+        aktif,
         kullanicilar (
           ad_soyad,
           eposta
@@ -56,13 +59,32 @@ const BookHistoryPage: React.FC = () => {
         )
       `
       )
-      .is("teslim_edilme_tarihi", null);
+      .is("teslim_edilme_tarihi", null)
+      .eq("aktif", true);
+
+    console.log("fetch error:", error);
+    console.log("fetch data:", data);
 
     if (error) {
-      console.error(error);
       setError("Veriler alınırken hata oluştu.");
+      setRentals([]);
+    } else if (!data || data.length === 0) {
+      setRentals([]);
     } else {
-      setRentals(data as Kiralama[]);
+      // normalize data: kitaplar bazen tek nesne olabilir, bazen array, ona göre düzeltelim
+      const normalizedData = data.map((item: any) => ({
+        ...item,
+        kullanicilar: Array.isArray(item.kullanicilar)
+          ? item.kullanicilar[0]
+          : item.kullanicilar,
+        kitaplar: item.kitaplar
+          ? Array.isArray(item.kitaplar)
+            ? item.kitaplar
+            : [item.kitaplar]
+          : [],
+      }));
+
+      setRentals(normalizedData as Kiralama[]);
     }
 
     setLoading(false);
@@ -71,6 +93,12 @@ const BookHistoryPage: React.FC = () => {
   useEffect(() => {
     fetchUndeliveredBooks();
   }, []);
+
+  const paginatedRentals = rentals.slice(
+    page * ITEMS_PER_PAGE,
+    (page + 1) * ITEMS_PER_PAGE
+  );
+  const totalPages = Math.ceil(rentals.length / ITEMS_PER_PAGE);
 
   const handleOpenConfirm = (id: string) => {
     setSelectedId(id);
@@ -82,16 +110,29 @@ const BookHistoryPage: React.FC = () => {
 
     setSubmittingId(selectedId);
     setConfirmOpen(false);
-    console.log(rentals);
-    // Teslim edilen kiralama
+
+    // Kiralamayı bul
     const rental = rentals.find((r) => r.id === selectedId);
-    if (!rental) return;
+    if (!rental) {
+      setError("Seçilen kiralama bulunamadı.");
+      setSubmittingId(null);
+      setSelectedId(null);
+      return;
+    }
 
-    const kitapId = rental.kitaplar?.id;
-    console.log(kitapId);
-    if (!kitapId) return;
+    // Kitap ID'sini al
+    const kitapId =
+      rental.kitaplar && rental.kitaplar.length > 0
+        ? rental.kitaplar[0].id
+        : null;
+    if (!kitapId) {
+      setError("Kitap bilgisi bulunamadı.");
+      setSubmittingId(null);
+      setSelectedId(null);
+      return;
+    }
 
-    // 1. Kiralama kaydını güncelle
+    // Teslim tarihini güncelle
     const { error: teslimError } = await supabase
       .from("kiralamalar")
       .update({ teslim_edilme_tarihi: new Date().toISOString() })
@@ -100,18 +141,21 @@ const BookHistoryPage: React.FC = () => {
     if (teslimError) {
       console.error("Teslim güncelleme hatası:", teslimError);
       setError("Teslim işlemi sırasında hata oluştu.");
-    } else {
-      // 2. Kitap stok sayısını artır
-      const { error: stokError } = await supabase.rpc("increase_stock", {
-        book_id: kitapId,
-      });
+      setSubmittingId(null);
+      return;
+    }
 
-      if (stokError) {
-        console.error("Stok artırma hatası:", stokError);
-        setError("Stok güncellenemedi.");
-      } else {
-        await fetchUndeliveredBooks();
-      }
+    // Stok artırma prosedürünü çağır
+    const { error: stokError } = await supabase.rpc("increase_stock", {
+      book_id: kitapId,
+    });
+
+    if (stokError) {
+      console.error("Stok artırma hatası:", stokError);
+      setError("Stok güncellenemedi.");
+    } else {
+      await fetchUndeliveredBooks();
+      setError(""); // önceki hatayı temizle
     }
 
     setSubmittingId(null);
@@ -157,21 +201,35 @@ const BookHistoryPage: React.FC = () => {
           <CircularProgress />
         </Box>
       ) : error ? (
-        <Alert severity="error">{error}</Alert>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
       ) : rentals.length === 0 ? (
         <Alert severity="info">Henüz teslim edilmemiş kitap yok.</Alert>
       ) : (
-        <Grid container spacing={3}>
-          {rentals.map((rental) => (
-            <Grid key={rental.id}>
-              <Fade in timeout={500}>
+        <>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 2,
+              justifyContent: "center",
+              maxWidth: "100%",
+              margin: "auto",
+            }}
+          >
+            {paginatedRentals.map((rental) => (
+              <Fade in timeout={500} key={rental.id}>
                 <Card
                   sx={{
-                    height: "100%",
+                    width: 250,
                     borderRadius: 4,
                     boxShadow: 6,
                     transition: "0.3s",
                     "&:hover": { boxShadow: 10 },
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
                   }}
                 >
                   <CardContent>
@@ -236,9 +294,36 @@ const BookHistoryPage: React.FC = () => {
                   </CardContent>
                 </Card>
               </Fade>
-            </Grid>
-          ))}
-        </Grid>
+            ))}
+          </Box>
+
+          {/* Sayfa Kontrolleri */}
+          <Box
+            mt={4}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            gap={2}
+          >
+            <Button
+              variant="outlined"
+              onClick={() => setPage((p) => Math.max(p - 1, 0))}
+              disabled={page === 0}
+            >
+              ⬅️ Geri
+            </Button>
+            <Typography>
+              Sayfa {page + 1} / {totalPages}
+            </Typography>
+            <Button
+              variant="outlined"
+              onClick={() => setPage((p) => Math.min(p + 1, totalPages - 1))}
+              disabled={page + 1 >= totalPages}
+            >
+              İleri ➡️
+            </Button>
+          </Box>
+        </>
       )}
 
       <ConfirmDialog

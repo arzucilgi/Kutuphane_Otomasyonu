@@ -26,6 +26,7 @@ const RentedBooksTable: React.FC<Props> = ({ rentedBooks }) => {
   };
 
   // Sadece teslim edilmemiş kitapları alıyoruz
+  // Sadece teslim edilmemiş ve aktif olan kitapları alıyoruz
   const unreturnedBooks = rentedBooks.filter(
     (book) => !book.teslim_edilme_tarihi
   );

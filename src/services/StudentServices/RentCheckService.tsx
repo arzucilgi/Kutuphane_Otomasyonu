@@ -1,50 +1,44 @@
 import { supabase } from "../../lib/supabaseClient";
 
-/**
- * Kullanıcının belirtilen kitabı kiralayıp kiralayamayacağını kontrol eder,
- * izin veriyorsa kiralama işlemini yapar.
- *
- * @param user_id Kullanıcının ID'si
- * @param book_id Kiralanacak kitabın ID'si
- * @param return_date Kitabın son teslim tarihi
- * @returns İşlem sonucu ve mesaj
- */
 export const rentBookIfAllowed = async (
   user_id: string,
   book_id: string,
   return_date: Date
 ) => {
   try {
-    // 1. Aynı kitabı daha önce almış ve iade etmemiş mi kontrolü
+    // 1. Aynı kitabı aktif olarak kiralamış mı kontrol et (onaylı ve teslim edilmemiş)
     const { data: existingRentals, error: existingError } = await supabase
       .from("kiralamalar")
       .select("id")
       .eq("kullanici_id", user_id)
       .eq("kitap_id", book_id)
-      .is("teslim_edilme_tarihi", null);
+      .is("teslim_edilme_tarihi", null)
+      .eq("aktif", true);
 
     if (existingError) throw existingError;
 
     if (existingRentals && existingRentals.length > 0) {
       return {
         success: false,
-        message: "Bu kitabı zaten ödünç aldınız ve henüz iade etmediniz.",
+        message:
+          "Bu kitabı zaten ödünç aldınız ve henüz iade etmediniz veya onay bekliyor.",
       };
     }
 
-    // 2. Kullanıcının aktif kiralama sayısını kontrol et
+    // 2. Kullanıcının aktif (onaylanmış) kiralama sayısını kontrol et
     const { count, error: countError } = await supabase
       .from("kiralamalar")
       .select("*", { count: "exact", head: true })
       .eq("kullanici_id", user_id)
       .is("teslim_edilme_tarihi", null);
+    // .eq("aktif", true);
 
     if (countError) throw countError;
 
     if (count !== null && count >= 5) {
       return {
         success: false,
-        message: "En fazla 5 kitap ödünç alabilirsiniz.",
+        message: "En fazla 5 aktif kitap ödünç alabilirsiniz.",
       };
     }
 
@@ -61,7 +55,7 @@ export const rentBookIfAllowed = async (
       return { success: false, message: "Kitap stokta yok." };
     }
 
-    // 4. Kiralama kaydını oluştur
+    // 4. Kiralama kaydını oluştur (aktif: false -> onay bekliyor)
     const { error: rentError } = await supabase.from("kiralamalar").insert([
       {
         kullanici_id: user_id,
@@ -69,23 +63,16 @@ export const rentBookIfAllowed = async (
         kiralama_tarihi: new Date().toISOString(),
         teslim_edilme_tarihi: null,
         son_teslim_tarihi: return_date.toISOString(),
+        aktif: false, // ❗ Onay bekliyor
       },
     ]);
 
     if (rentError) throw rentError;
 
-    // 5. Kitap stok bilgisini güncelle (stok adedini 1 azalt)
-    const { error: updateStokError } = await supabase
-      .from("kitaplar")
-      .update({ stok_adedi: kitap.stok_adedi - 1 })
-      .eq("id", book_id);
-
-    if (updateStokError) throw updateStokError;
-
-    // 6. NOT: Kullanıcının aktif kitap sayısını veritabanında tutmuyoruz,
-    // aktif kiralama sayısı gerektiğinde dinamik olarak hesaplanmalı.
-
-    return { success: true, message: "Kitap başarıyla ödünç alındı." };
+    return {
+      success: true,
+      message: "Kiralama talebiniz alındı, onay bekliyor.",
+    };
   } catch (err: any) {
     console.error("rentBookIfAllowed error:", err.message);
     return { success: false, message: "Kiralama sırasında hata oluştu." };
@@ -103,10 +90,14 @@ export const getActiveRentalCount = async (userId: string): Promise<number> => {
     .from("kiralamalar")
     .select("*", { count: "exact", head: true })
     .eq("kullanici_id", userId)
-    .is("teslim_edilme_tarihi", null);
+    .is("teslim_edilme_tarihi", null) // sadece teslim edilmemişleri say
+    .eq("aktif", true);
 
   if (error) {
-    console.error("Aktif kiralama sayısı alınamadı:", error.message);
+    console.error(
+      "Aktif (veya bekleyen) kiralama sayısı alınamadı:",
+      error.message
+    );
     return 0;
   }
 
@@ -119,10 +110,11 @@ export const fetchBookHistory = async (bookId: string) => {
     .select(
       `id, kiralama_tarihi, teslim_edilme_tarihi, son_teslim_tarihi,
        kullanicilar(ad_soyad, eposta),
-       kitaplar(kitap_adi, yayinevleri:yayinevi_id(isim))`
+       kitaplar(id, kitap_adi, yayinevleri:yayinevi_id(isim))`
     )
     .eq("kitap_id", bookId)
-    .order("kiralama_tarihi", { ascending: false });
+    .order("kiralama_tarihi", { ascending: false })
+    .eq("aktif", true);
 
   if (error) throw error;
 

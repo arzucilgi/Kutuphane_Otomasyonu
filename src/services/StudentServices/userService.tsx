@@ -44,6 +44,7 @@ export const fetchBooksRentedByUser = async (userId: string) => {
     `
     )
     .eq("kullanici_id", userId)
+    .eq("aktif", true) // sadece aktif kiralamaları getir
     .order("kiralama_tarihi", { ascending: false });
 
   if (error) {

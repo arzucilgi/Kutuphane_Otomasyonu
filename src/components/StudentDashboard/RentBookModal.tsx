@@ -53,11 +53,14 @@ const RentBookModal: React.FC<Props> = ({ open, onClose, onSuccess }) => {
       kullanici_id: user.id,
       kitap_id: book.id,
       son_teslim_tarihi: returnDate,
+      aktif: false,
     });
 
     setRenting(false);
     if (!error) {
-      toast.success("Kitap başarıyla ödünç alındı.");
+      toast.success(
+        "Kitap ödünç alma isteğiniz alındı. Onaylandıktan sonra geçerli olacaktır."
+      );
       onSuccess?.();
       onClose();
     } else {
