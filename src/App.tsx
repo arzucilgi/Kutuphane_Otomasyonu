@@ -17,11 +17,9 @@ import AddEmployee from "./components/ManagerDashboard/AddEmployee";
 import OfficerDashboard from "./pages/OfficerDashboard";
 import BookManagement from "./components/OfficerDashboard/BookManagement/BookManagement";
 import BookList from "./components/OfficerDashboard/BookManagement/BookList";
-import AddBook from "./components/OfficerDashboard/BookManagement/AddBook";
-import CreateBookDialog from "./components/OfficerDashboard/BookManagement/CreateBookDialog";
-import { useState } from "react";
 import StudentListPage from "./components/OfficerDashboard/StudentManagement/StudentListPage";
-import BookHistoryPage from "./components/OfficerDashboard/RentalHistoryManagement/BookHistoryPage ";
+import SingleBookHistoryPage from "./components/OfficerDashboard/RentalHistoryManagement/SingleBookHistoryPage";
+import BookHistoryPage from "./components/OfficerDashboard/RentalHistoryManagement/BookHistoryPage";
 
 function App() {
   return (
@@ -74,7 +72,10 @@ function App() {
             <Route index element={<BookList />} />
           </Route>
           <Route path="rental-history" element={<BookHistoryPage />} />
-          <Route path="rental-history/:bookId" element={<BookHistoryPage />} />
+          <Route
+            path="rental-history/:bookId"
+            element={<SingleBookHistoryPage />}
+          />
           <Route path="students" element={<StudentListPage />} />
         </Route>
       </Routes>

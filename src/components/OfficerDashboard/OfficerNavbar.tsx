@@ -51,7 +51,7 @@ const items = [
   {
     label: "Kiralama Geçmişi",
     icon: <HistoryEduIcon sx={{ fontSize: "30px", color: "black" }} />,
-    to: "rental-history/",
+    to: "/officerDashboard/rental-history",
   },
   {
     label: "Ceza İşlemleri",

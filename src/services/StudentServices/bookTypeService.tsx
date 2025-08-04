@@ -31,3 +31,18 @@ export interface Comment {
   puan: number;
   tarih: string;
 }
+
+export interface Kiralama {
+  id: string;
+  kiralama_tarihi: string;
+  teslim_edilme_tarihi: string;
+  son_teslim_tarihi: string;
+  kullanicilar: {
+    ad_soyad: string;
+    eposta: string;
+  };
+  kitaplar: {
+    kitap_adi: string;
+    yayinevleri: { isim: string }[];
+  }[];
+}

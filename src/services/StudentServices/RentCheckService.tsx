@@ -112,3 +112,26 @@ export const getActiveRentalCount = async (userId: string): Promise<number> => {
 
   return count ?? 0;
 };
+
+export const fetchBookHistory = async (bookId: string) => {
+  const { data, error } = await supabase
+    .from("kiralamalar")
+    .select(
+      `id, kiralama_tarihi, teslim_edilme_tarihi, son_teslim_tarihi,
+       kullanicilar(ad_soyad, eposta),
+       kitaplar(kitap_adi, yayinevleri:yayinevi_id(isim))`
+    )
+    .eq("kitap_id", bookId)
+    .order("kiralama_tarihi", { ascending: false });
+
+  if (error) throw error;
+
+  const normalized = (data ?? []).map((rental) => ({
+    ...rental,
+    kullanicilar: Array.isArray(rental.kullanicilar)
+      ? rental.kullanicilar[0]
+      : rental.kullanicilar,
+  }));
+
+  return normalized;
+};

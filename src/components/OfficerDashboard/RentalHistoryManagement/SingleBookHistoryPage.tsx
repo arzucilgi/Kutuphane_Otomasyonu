@@ -12,31 +12,20 @@ import {
   Grid,
   Button,
 } from "@mui/material";
-import type { Kitap } from "../../../services/StudentServices/bookTypeService";
+import type {
+  Kitap,
+  Kiralama,
+} from "../../../services/StudentServices/bookTypeService";
 import {
   fetchKitaplar,
   fetchYayinevleri,
   fetchYazarlar,
 } from "../../../services/StudentServices/bookService";
-
-interface Kiralama {
-  id: string;
-  kiralama_tarihi: string;
-  teslim_edilme_tarihi: string;
-  son_teslim_tarihi: string;
-  kullanicilar: {
-    ad_soyad: string;
-    eposta: string;
-  };
-  kitaplar: {
-    kitap_adi: string;
-    yayinevleri: { isim: string }[];
-  }[];
-}
+import { fetchBookHistory } from "../../../services/StudentServices/RentCheckService";
 
 const ITEMS_PER_PAGE = 6;
 
-const BookHistoryPage = () => {
+const SingleBookHistoryPage = () => {
   const { bookId } = useParams<{ bookId: string }>();
   const [rentals, setRentals] = useState<Kiralama[]>([]);
   const [book, setBook] = useState<Kitap | null>(null);
@@ -57,24 +46,10 @@ const BookHistoryPage = () => {
       setError(null);
 
       try {
-        const { data: rentalData, error: rentalError } = await supabase
-          .from("kiralamalar")
-          .select(
-            "id, kiralama_tarihi, teslim_edilme_tarihi, son_teslim_tarihi, kullanicilar(ad_soyad, eposta), kitaplar(kitap_adi, yayinevleri:yayinevi_id(isim))"
-          )
-          .eq("kitap_id", bookId)
-          .order("kiralama_tarihi", { ascending: false });
+        const rentalData = await fetchBookHistory(bookId);
+        setRentals(rentalData);
 
-        if (rentalError) throw rentalError;
-
-        const normalized = (rentalData ?? []).map((rental) => ({
-          ...rental,
-          kullanicilar: Array.isArray(rental.kullanicilar)
-            ? rental.kullanicilar[0]
-            : rental.kullanicilar,
-        }));
-
-        setRentals(normalized as Kiralama[]);
+        // setRentals(normalized as Kiralama[]);
 
         const kitaplar = await fetchKitaplar();
         const selectedBook = kitaplar.find((kitap) => kitap.id === bookId);
@@ -305,4 +280,4 @@ const BookHistoryPage = () => {
   );
 };
 
-export default BookHistoryPage;
+export default SingleBookHistoryPage;
