@@ -49,7 +49,7 @@ const items = [
     to: "students",
   },
   {
-    label: "Kiralama Geçmişi",
+    label: "Kiralama İşlemleri",
     icon: <HistoryEduIcon sx={{ fontSize: "30px", color: "black" }} />,
     to: "/officerDashboard/rental-history",
   },
