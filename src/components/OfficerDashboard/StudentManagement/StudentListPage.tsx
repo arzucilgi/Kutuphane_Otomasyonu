@@ -314,7 +314,7 @@ const StudentListPage = () => {
             onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
             disabled={page === 0}
           >
-            Geri
+            ◀ Geri
           </Button>
           <Button
             variant="outlined"
@@ -327,7 +327,7 @@ const StudentListPage = () => {
             }
             disabled={(page + 1) * itemsPerPage >= filteredStudents.length}
           >
-            İleri
+            İleri ▶
           </Button>
         </Stack>
 

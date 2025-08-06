@@ -49,8 +49,6 @@ const SingleBookHistoryPage = () => {
         const rentalData = await fetchBookHistory(bookId);
         setRentals(rentalData);
 
-        // setRentals(normalized as Kiralama[]);
-
         const kitaplar = await fetchKitaplar();
         const selectedBook = kitaplar.find((kitap) => kitap.id === bookId);
         if (!selectedBook) throw new Error("Kitap bulunamadı.");
@@ -140,19 +138,24 @@ const SingleBookHistoryPage = () => {
                   </Typography>
 
                   <Typography variant="body1" gutterBottom>
-                    <strong>🖋️ Yazar:</strong> {yazarAdi ?? "Bilinmiyor"}
+                    <strong> Yazar:</strong> {yazarAdi ?? "Bilinmiyor"}
                   </Typography>
 
                   <Typography variant="body1" gutterBottom>
-                    <strong>🏢 Yayın Evi:</strong> {yayineviAdi ?? "Bilinmiyor"}
+                    <strong> Yayın Evi:</strong> {yayineviAdi ?? "Bilinmiyor"}
                   </Typography>
 
                   <Typography variant="body1" gutterBottom>
-                    <strong>📄 Sayfa Sayısı:</strong> {book.sayfa_sayisi}
+                    <strong>Sayfa Sayısı:</strong> {book.sayfa_sayisi}
+                  </Typography>
+
+                  <Typography variant="body1" gutterBottom>
+                    <strong>Kiralama Sayısı:</strong> Toplam {rentals.length}{" "}
+                    kez kiralanmış
                   </Typography>
 
                   <Typography variant="body2" sx={{ mt: 2, color: "#555" }}>
-                    <strong>📝 Özet:</strong> {book.ozet}
+                    <strong>Özet:</strong> {book.ozet}
                   </Typography>
                 </Box>
               </Card>
@@ -179,8 +182,8 @@ const SingleBookHistoryPage = () => {
                           sx={{
                             height: "100%",
                             boxShadow: teslimEdildi
-                              ? "0 4px 10px rgba(76, 175, 80, 0.3)" // yeşil gölge
-                              : "0 4px 10px rgba(244, 67, 54, 0.3)", // kırmızı gölge
+                              ? "0 4px 10px rgba(76, 175, 80, 0.3)"
+                              : "0 4px 10px rgba(244, 67, 54, 0.3)",
                             borderRadius: 3,
                             transition: "transform 0.2s ease",
                             "&:hover": { transform: "scale(1.03)" },
@@ -191,11 +194,11 @@ const SingleBookHistoryPage = () => {
                               👤 {rental.kullanicilar?.ad_soyad}
                             </Typography>
                             <Typography variant="body2" sx={{ mb: 0.5 }}>
-                              📧 {rental.kullanicilar?.eposta}
+                              {rental.kullanicilar?.eposta}
                             </Typography>
 
                             <Typography variant="body2" sx={{ mb: 0.5 }}>
-                              📅 Kiralama:{" "}
+                              Kiralama:{" "}
                               {new Date(
                                 rental.kiralama_tarihi
                               ).toLocaleDateString("tr-TR", {
@@ -206,7 +209,7 @@ const SingleBookHistoryPage = () => {
                             </Typography>
 
                             <Typography variant="body2" sx={{ mb: 0.5 }}>
-                              📅 Son Teslim:{" "}
+                              Son Teslim:{" "}
                               {rental.son_teslim_tarihi
                                 ? new Date(
                                     rental.son_teslim_tarihi
@@ -256,7 +259,7 @@ const SingleBookHistoryPage = () => {
                     onClick={() => setPage((p) => Math.max(p - 1, 0))}
                     disabled={page === 0}
                   >
-                    ⬅️ Geri
+                    ◀ Geri
                   </Button>
                   <Typography>
                     Sayfa {page + 1} / {totalPages}
@@ -268,7 +271,7 @@ const SingleBookHistoryPage = () => {
                     }
                     disabled={page + 1 >= totalPages}
                   >
-                    İleri ➡️
+                    İleri ▶
                   </Button>
                 </Box>
               </>

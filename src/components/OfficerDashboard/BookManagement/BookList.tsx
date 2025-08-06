@@ -41,6 +41,7 @@ import type {
   Raf,
 } from "../../../services/StudentServices/bookTypeService";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const BookList = () => {
   const [kitaplar, setKitaplar] = useState<Kitap[]>([]);
@@ -177,11 +178,12 @@ const BookList = () => {
     try {
       await deleteKitap(kitapToDelete.id);
       setKitaplar((prev) => prev.filter((k) => k.id !== kitapToDelete.id));
+      toast.success("Seçilen kitap başarıyla silindi!");
       setDeleteDialogOpen(false);
       setKitapToDelete(null);
     } catch (error) {
       console.error(error);
-      alert("Silme sırasında bir hata oluştu.");
+      toast.error("Silme sırasında bir hata oluştu.");
     }
   };
 
@@ -205,10 +207,11 @@ const BookList = () => {
         k.id === selectedKitap.id ? selectedKitap : k
       );
       setKitaplar(updatedList);
+      toast.success("Seçilen kitap başarıyla güncellendi!");
       setEditOpen(false);
     } catch (error) {
       console.error(error);
-      alert("Güncelleme sırasında bir hata oluştu.");
+      toast.error("Güncelleme sırasında bir hata oluştu.");
     }
   };
 

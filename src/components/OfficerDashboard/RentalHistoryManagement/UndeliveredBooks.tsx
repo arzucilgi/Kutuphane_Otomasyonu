@@ -342,7 +342,7 @@ const UndeliveredBooks: React.FC = () => {
               onClick={() => setPage((p) => Math.max(p - 1, 0))}
               disabled={page === 0}
             >
-              ⬅️ Geri
+              ◀ Geri
             </Button>
             <Typography>
               Sayfa {page + 1} / {totalPages}
@@ -352,7 +352,7 @@ const UndeliveredBooks: React.FC = () => {
               onClick={() => setPage((p) => Math.min(p + 1, totalPages - 1))}
               disabled={page + 1 >= totalPages}
             >
-              İleri ➡️
+              İleri ▶
             </Button>
           </Box>
         </>

@@ -317,7 +317,7 @@ const PendingRentals: React.FC = () => {
               onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
               disabled={page === 0}
             >
-              ⬅️ Geri
+              ◀ Geri
             </Button>
             <Typography>
               Sayfa {page + 1} / {totalPages}
@@ -329,7 +329,7 @@ const PendingRentals: React.FC = () => {
               }
               disabled={page + 1 >= totalPages}
             >
-              İleri ➡️
+              İleri ▶
             </Button>
           </Box>
 
