@@ -151,7 +151,6 @@ const StudentRentalHistoryPage = () => {
                   {student.ad_soyad}
                 </Typography>
                 <Typography color="text.secondary">{student.eposta}</Typography>
-                <Typography color="text.secondary">ID: {student.id}</Typography>
                 <Typography color="text.secondary">
                   Kayıt Tarihi:{" "}
                   {new Date(student.olusturulma_tarihi).toLocaleDateString()}

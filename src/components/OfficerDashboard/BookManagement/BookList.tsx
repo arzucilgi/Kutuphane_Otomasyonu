@@ -1,4 +1,3 @@
-// imports (değişmedi)
 import React, { useEffect, useState } from "react";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import type { GridRenderCellParams } from "@mui/x-data-grid";
@@ -43,7 +42,6 @@ import type {
 } from "../../../services/StudentServices/bookTypeService";
 import { useNavigate } from "react-router-dom";
 
-// component
 const BookList = () => {
   const [kitaplar, setKitaplar] = useState<Kitap[]>([]);
   const [yazarlar, setYazarlar] = useState<Yazar[]>([]);
@@ -62,6 +60,25 @@ const BookList = () => {
   const [selectedKitap, setSelectedKitap] = useState<Kitap | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [kitapToDelete, setKitapToDelete] = useState<Kitap | null>(null);
+
+  // Filtreleri tutan state
+  const [filters, setFilters] = useState<{
+    yazarId: string | null;
+    kategoriId: string | null;
+    yayineviId: string | null;
+    rafId: string | null;
+  }>({
+    yazarId: null,
+    kategoriId: null,
+    yayineviId: null,
+    rafId: null,
+  });
+
+  // ** Yeni: Kategori seçimi için ayrı state **
+  const [selectedKategoriId, setSelectedKategoriId] = useState<string | null>(
+    null
+  );
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -105,6 +122,44 @@ const BookList = () => {
 
     getData();
   }, []);
+
+  // Filtrelenmiş kitaplar
+  const filteredKitaplar = kitaplar.filter((kitap) => {
+    if (filters.yazarId && kitap.yazar_id !== filters.yazarId) return false;
+    if (filters.kategoriId && kitap.kategori_id !== filters.kategoriId)
+      return false;
+    if (filters.yayineviId && kitap.yayinevi_id !== filters.yayineviId)
+      return false;
+    if (filters.rafId && kitap.raf_id !== filters.rafId) return false;
+    return true;
+  });
+
+  const handleFilterChange = (
+    filterName: keyof typeof filters,
+    value: string | null
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      [filterName]: value,
+    }));
+  };
+
+  // Seçilen kitabın yüklenmesi veya değişmesi durumunda selectedKategoriId güncellenir
+  useEffect(() => {
+    setSelectedKategoriId(selectedKitap?.kategori_id || null);
+  }, [selectedKitap]);
+
+  // Kategori değiştiğinde hem selectedKategoriId hem de selectedKitap güncelleniyor, raf_id sıfırlanıyor
+  const handleKategoriChange = (val: Kategori | null) => {
+    const newKategoriId = val?.id || "";
+    setSelectedKategoriId(newKategoriId);
+    if (!selectedKitap) return;
+    setSelectedKitap({
+      ...selectedKitap,
+      kategori_id: newKategoriId,
+      raf_id: "", // Rafı temizle kategori değişince
+    });
+  };
 
   const handleEditClick = (kitap: Kitap) => {
     setSelectedKitap(kitap);
@@ -255,12 +310,65 @@ const BookList = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom fontWeight="bold">
-        Kitap Listesi
-      </Typography>
+      {/* Filtre inputları */}
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        mb={2}
+        flexWrap="wrap"
+      >
+        <Autocomplete
+          options={yazarlar}
+          getOptionLabel={(option) => option.isim}
+          value={yazarlar.find((y) => y.id === filters.yazarId) || null}
+          onChange={(_, val) => handleFilterChange("yazarId", val?.id || null)}
+          renderInput={(params) => <TextField {...params} label="Yazar" />}
+          clearOnEscape
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          size="small"
+          sx={{ minWidth: 250 }}
+        />
+        <Autocomplete
+          options={kategoriler}
+          getOptionLabel={(option) => option.ad}
+          value={kategoriler.find((k) => k.id === filters.kategoriId) || null}
+          onChange={(_, val) =>
+            handleFilterChange("kategoriId", val?.id || null)
+          }
+          renderInput={(params) => <TextField {...params} label="Kategori" />}
+          clearOnEscape
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          size="small"
+          sx={{ minWidth: 250 }}
+        />
+        <Autocomplete
+          options={yayinevleri}
+          getOptionLabel={(option) => option.isim}
+          value={yayinevleri.find((y) => y.id === filters.yayineviId) || null}
+          onChange={(_, val) =>
+            handleFilterChange("yayineviId", val?.id || null)
+          }
+          renderInput={(params) => <TextField {...params} label="Yayınevi" />}
+          clearOnEscape
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          size="small"
+          sx={{ minWidth: 250 }}
+        />
+        <Autocomplete
+          options={raflar}
+          getOptionLabel={(option) => option.raf_no}
+          value={raflar.find((r) => r.id === filters.rafId) || null}
+          onChange={(_, val) => handleFilterChange("rafId", val?.id || null)}
+          renderInput={(params) => <TextField {...params} label="Raf" />}
+          clearOnEscape
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          size="small"
+          sx={{ minWidth: 250 }}
+        />
+      </Stack>
 
       <DataGrid
-        rows={kitaplar}
+        rows={filteredKitaplar}
         columns={columns}
         getRowId={(row) => row.id}
         paginationModel={paginationModel}
@@ -327,17 +435,14 @@ const BookList = () => {
               />
             </Box>
             <Stack spacing={2}>
+              {/* Kategori autocomplete: ayrı state ile */}
               <Autocomplete
                 options={kategoriler}
                 getOptionLabel={(option) => option.ad}
                 value={
-                  kategoriler.find(
-                    (k) => k.id === selectedKitap?.kategori_id
-                  ) || null
+                  kategoriler.find((k) => k.id === selectedKategoriId) || null
                 }
-                onChange={(_, val) =>
-                  handleSelectChange("kategori_id", val?.id || "")
-                }
+                onChange={(_, val) => handleKategoriChange(val)}
                 renderInput={(params) => (
                   <TextField {...params} label="Kategori" />
                 )}
@@ -385,8 +490,13 @@ const BookList = () => {
                 renderInput={(params) => <TextField {...params} label="Tür" />}
                 fullWidth
               />
+              {/* Raf autocomplete: sadece seçilen kategoriye ait raflar listelenir */}
               <Autocomplete
-                options={raflar}
+                options={
+                  selectedKategoriId
+                    ? raflar.filter((r) => r.kategori_id === selectedKategoriId)
+                    : []
+                }
                 getOptionLabel={(option) => option.raf_no}
                 value={
                   raflar.find((r) => r.id === selectedKitap?.raf_id) || null
@@ -396,6 +506,8 @@ const BookList = () => {
                 }
                 renderInput={(params) => <TextField {...params} label="Raf" />}
                 fullWidth
+                disabled={!selectedKategoriId}
+                noOptionsText="Önce kategori seçin"
               />
             </Stack>
             <TextField
