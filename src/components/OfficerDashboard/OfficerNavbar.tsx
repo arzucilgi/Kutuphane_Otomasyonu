@@ -53,11 +53,11 @@ const items = [
     icon: <HistoryEduIcon sx={{ fontSize: "30px", color: "black" }} />,
     to: "/officerDashboard/rental-history",
   },
-  {
-    label: "Ceza İşlemleri",
-    icon: <WarningAmberIcon sx={{ fontSize: "30px", color: "black" }} />,
-    to: "penalty-operations",
-  },
+  // {
+  //   label: "Ceza İşlemleri",
+  //   icon: <WarningAmberIcon sx={{ fontSize: "30px", color: "black" }} />,
+  //   to: "penalty-operations",
+  // },
   //   {
   //     label: "Öğrenciye Mesaj",
   //     icon: <ChatIcon sx={{ fontSize: "30px", color: "black" }} />,
@@ -68,16 +68,16 @@ const items = [
   //     icon: <ShoppingCartIcon sx={{ fontSize: "30px", color: "black" }} />,
   //     to: "rent-book",
   //   },
-  {
-    label: "Kitap İade",
-    icon: <AssignmentReturnIcon sx={{ fontSize: "30px", color: "black" }} />,
-    to: "return-book",
-  },
-  {
-    label: "Kiralama Takibi",
-    icon: <ManageHistoryIcon sx={{ fontSize: "30px", color: "black" }} />,
-    to: "rental-tracking",
-  },
+  // {
+  //   label: "Kitap İade",
+  //   icon: <AssignmentReturnIcon sx={{ fontSize: "30px", color: "black" }} />,
+  //   to: "return-book",
+  // },
+  // {
+  //   label: "Kiralama Takibi",
+  //   icon: <ManageHistoryIcon sx={{ fontSize: "30px", color: "black" }} />,
+  //   to: "rental-tracking",
+  // },
   {
     label: "Raporlar",
     icon: <QueryStatsIcon sx={{ fontSize: "30px", color: "black" }} />,
@@ -122,7 +122,7 @@ const OfficerNavbar = () => {
             <Paper
               elevation={6}
               sx={{
-                width: 100,
+                width: 120,
                 height: 100,
                 display: "flex",
                 flexDirection: "column",
@@ -144,6 +144,7 @@ const OfficerNavbar = () => {
               <Typography
                 variant="subtitle2"
                 align="center"
+                whiteSpace={"nowrap"}
                 sx={{ fontWeight: 500 }}
               >
                 {item.label}

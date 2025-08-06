@@ -36,9 +36,14 @@ export const fetchBooksRentedByUser = async (userId: string) => {
       teslim_edilme_tarihi,
       kitaplar (
         kitap_adi,
+        kapak_url,
         id,
         yazarlar (
           isim
+        ),
+        kategoriler(
+        id,
+        ad
         )
       )
     `
@@ -57,8 +62,10 @@ export const fetchBooksRentedByUser = async (userId: string) => {
     kitap_id: item.kitaplar?.id,
     kitap_adi: item.kitaplar?.kitap_adi || "Bilinmiyor",
     yazar_adi: item.kitaplar?.yazarlar?.isim || "Bilinmiyor",
+    kategori_adi: item.kitaplar?.kategoriler?.ad || "Bilinmiyor",
     kiralama_tarihi: item.kiralama_tarihi,
     son_teslim_tarihi: item.son_teslim_tarihi,
     teslim_edilme_tarihi: item.teslim_edilme_tarihi,
+    kapak_url: item.kitaplar?.kapak_url || "",
   }));
 };

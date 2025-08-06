@@ -20,6 +20,7 @@ import BookList from "./components/OfficerDashboard/BookManagement/BookList";
 import StudentListPage from "./components/OfficerDashboard/StudentManagement/StudentListPage";
 import SingleBookHistoryPage from "./components/OfficerDashboard/RentalHistoryManagement/SingleBookHistoryPage";
 import BookHistoryPage from "./components/OfficerDashboard/RentalHistoryManagement/BookHistoryPage";
+import StudentRentalHistoryPage from "./components/OfficerDashboard/RentalHistoryManagement/StudentRentalHistoryPage";
 
 function App() {
   return (
@@ -75,6 +76,10 @@ function App() {
           <Route
             path="rental-history/:bookId"
             element={<SingleBookHistoryPage />}
+          />
+          <Route
+            path="student-rental-history/:studentId"
+            element={<StudentRentalHistoryPage />}
           />
           <Route path="students" element={<StudentListPage />} />
         </Route>

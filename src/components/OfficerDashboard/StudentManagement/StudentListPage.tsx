@@ -242,10 +242,14 @@ const StudentListPage = () => {
                   {new Date(student.olusturulma_tarihi).toLocaleString()}
                 </Typography>
                 <Stack direction="row" spacing={1}>
-                  <Tooltip title="Geçmiş">
+                  <Tooltip title="Kiralama Geçmişi">
                     <IconButton
                       color="primary"
-                      onClick={() => navigate(`/students/${student.id}`)}
+                      onClick={() =>
+                        navigate(
+                          `/officerDashboard/student-rental-history/${student.id}`
+                        )
+                      }
                       size="small"
                     >
                       <History />
