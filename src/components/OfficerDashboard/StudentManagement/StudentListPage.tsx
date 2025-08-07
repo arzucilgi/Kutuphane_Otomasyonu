@@ -28,6 +28,8 @@ interface Student {
   olusturulma_tarihi: string;
 }
 
+const SUPABASE_BASE_URL = process.env.REACT_APP_SUPABASE_URL!;
+
 const StudentListPage = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -74,7 +76,7 @@ const StudentListPage = () => {
       const token = session.data.session?.access_token;
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL!}/functions/v1/smooth-action`,
+        `${SUPABASE_BASE_URL}/functions/v1/smooth-action`,
         {
           method: "POST",
           headers: {
@@ -118,8 +120,7 @@ const StudentListPage = () => {
       }
 
       const res = await fetch(
-        `${process.env
-          .NEXT_PUBLIC_SUPABASE_URL!}/functions/v1/bright-processor`,
+        `${SUPABASE_BASE_URL}/functions/v1/bright-processor`,
         {
           method: "POST",
           headers: {
