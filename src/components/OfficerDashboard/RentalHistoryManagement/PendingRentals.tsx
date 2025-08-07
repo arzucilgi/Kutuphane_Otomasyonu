@@ -13,6 +13,7 @@ import {
   useTheme,
   TextField,
   InputAdornment,
+  useMediaQuery,
 } from "@mui/material";
 import { supabase } from "../../../lib/supabaseClient";
 import SearchIcon from "@mui/icons-material/Search";
@@ -49,6 +50,8 @@ const PendingRentals: React.FC = () => {
   const [selectedRentalId, setSelectedRentalId] = useState<string | null>(null);
 
   const theme = useTheme();
+
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const fetchPendingRentals = async () => {
     setLoading(true);
@@ -191,10 +194,17 @@ const PendingRentals: React.FC = () => {
         </>
       ) : (
         <>
-          <Box display="flex" justifyContent="space-between" mb={3}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            mb={3}
+            flexDirection={isSmallScreen ? "column" : "row"}
+            gap={isSmallScreen ? 2 : 0} // mobilde aralarına boşluk ekler
+            alignItems={isSmallScreen ? "stretch" : "center"} // mobilde tam genişlik, desktopda ortala
+          >
             <Typography
               variant="h5"
-              mb={2}
+              mb={isSmallScreen ? 2 : 0}
               fontWeight="bold"
               color={theme.palette.primary.main}
             >
@@ -223,9 +233,9 @@ const PendingRentals: React.FC = () => {
             sx={{
               display: "flex",
               flexWrap: "wrap",
-              gap: 2,
+              gap: 4,
               justifyContent: "center",
-              alignItems: "stretch",
+              alignItems: "center",
               maxWidth: "100%",
               margin: "auto",
               minHeight: 200,
@@ -235,7 +245,7 @@ const PendingRentals: React.FC = () => {
               <Card
                 key={rental.id}
                 sx={{
-                  width: 300,
+                  width: 250,
                   borderRadius: 4,
                   boxShadow: 3,
                   transition: "0.3s",

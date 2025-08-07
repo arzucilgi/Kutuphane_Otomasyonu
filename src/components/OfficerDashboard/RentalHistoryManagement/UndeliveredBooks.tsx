@@ -14,6 +14,7 @@ import {
   Alert,
   TextField,
   InputAdornment,
+  useMediaQuery,
 } from "@mui/material";
 import { supabase } from "../../../lib/supabaseClient";
 import type { Kiralama } from "../../../services/StudentServices/bookTypeService";
@@ -33,6 +34,8 @@ const UndeliveredBooks: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
   const filteredRentals = rentals.filter((rental) => {
     console.log(rental);
     const query = searchQuery.toLowerCase();
@@ -223,10 +226,17 @@ const UndeliveredBooks: React.FC = () => {
       ) : (
         <>
           {" "}
-          <Box display="flex" justifyContent="space-between" mb={3}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            mb={3}
+            flexDirection={isSmallScreen ? "column" : "row"}
+            gap={isSmallScreen ? 2 : 0} // Mobilde araya boşluk
+            alignItems={isSmallScreen ? "stretch" : "center"} // Mobilde tam genişlik, büyük ekranda ortala
+          >
             <Typography
               variant="h5"
-              mb={4}
+              mb={isSmallScreen ? 4 : 0}
               fontWeight="bold"
               color={theme.palette.primary.main}
             >
@@ -254,7 +264,7 @@ const UndeliveredBooks: React.FC = () => {
             sx={{
               display: "flex",
               flexWrap: "wrap",
-              gap: 2,
+              gap: 4,
               justifyContent: "center",
               alignItems: "stretch",
               maxWidth: "100%",
@@ -265,7 +275,7 @@ const UndeliveredBooks: React.FC = () => {
               <Card
                 key={rental.id}
                 sx={{
-                  width: 300,
+                  width: 250,
                   borderRadius: 4,
                   boxShadow: 3,
                   transition: "0.3s",

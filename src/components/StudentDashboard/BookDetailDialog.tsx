@@ -86,7 +86,6 @@ const BookDetailDialog: React.FC<BookDetailDialogProps> = ({
       .order("tarih", { ascending: false });
 
     if (!error && data) {
-      // Eğer supabase yanlışlıkla dizi döndürüyorsa buradan kontrol edelim
       const commentsWithUser: Comment[] = data.map((item: any) => ({
         ...item,
         kullanici_adi: Array.isArray(item.kullanicilar)
@@ -111,7 +110,13 @@ const BookDetailDialog: React.FC<BookDetailDialogProps> = ({
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="md"
+        fullWidth
+        scroll="body"
+      >
         <Box
           display="flex"
           flexDirection={{ xs: "column", md: "row" }}
@@ -119,14 +124,13 @@ const BookDetailDialog: React.FC<BookDetailDialogProps> = ({
             bgcolor: "#fafafa",
             borderRadius: 2,
             overflow: "hidden",
-            maxHeight: "90vh",
           }}
         >
           {/* Cover Image */}
           <Box
             sx={{
-              width: { xs: "100%", md: "40%" },
-              height: { xs: 300, md: "auto" },
+              width: { xs: "100%", md: "35%" },
+              height: { xs: 250, md: "auto" },
               backgroundImage: `url(${
                 kitap.kapak_url || "https://via.placeholder.com/300x400"
               })`,
@@ -140,7 +144,11 @@ const BookDetailDialog: React.FC<BookDetailDialogProps> = ({
           <Box
             flex={1}
             p={3}
-            sx={{ overflowY: "auto", maxHeight: "90vh", position: "relative" }}
+            sx={{
+              overflowY: "auto",
+              maxHeight: "90vh",
+              position: "relative",
+            }}
           >
             <IconButton
               aria-label="close"
@@ -154,7 +162,7 @@ const BookDetailDialog: React.FC<BookDetailDialogProps> = ({
               {kitap.kitap_adi}
             </Typography>
 
-            <Box display="flex" flexDirection="column" gap={2} mt={4}>
+            <Box display="flex" flexDirection="column" gap={1}>
               <BookDetailItem label="Yazar" value={kitap.yazar?.isim} />
               <BookDetailItem label="Yayınevi" value={kitap.yayinevi?.isim} />
               <BookDetailItem label="Kategori" value={kitap.kategori?.ad} />
@@ -162,7 +170,7 @@ const BookDetailDialog: React.FC<BookDetailDialogProps> = ({
               <BookDetailItem label="Stok Adedi" value={kitap.stok_adedi} />
               <BookDetailItem label="Raf Numarası" value={kitap.raf?.raf_no} />
               <BookDetailItem
-                label="Added Date"
+                label="Eklenme Tarihi"
                 value={kitap.eklenme_tarihi?.split("T")[0]}
               />
 
@@ -175,7 +183,7 @@ const BookDetailDialog: React.FC<BookDetailDialogProps> = ({
                   Özet
                 </Typography>
                 <Typography variant="body2" sx={{ whiteSpace: "pre-line" }}>
-                  {kitap.ozet ?? "Summary not available."}
+                  {kitap.ozet ?? "Özet bulunmuyor."}
                 </Typography>
               </Box>
 
@@ -209,11 +217,8 @@ const BookDetailDialog: React.FC<BookDetailDialogProps> = ({
         onClose={() => setCommentsOpen(false)}
         maxWidth="sm"
         fullWidth
-        sx={{
-          maxHeight: 600,
-          overflowY: "auto",
-          mt: 10,
-        }}
+        scroll="body"
+        sx={{ mt: 10 }}
       >
         <DialogTitle>
           Kitap Yorumları

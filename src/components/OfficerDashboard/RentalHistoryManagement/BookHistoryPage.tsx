@@ -7,7 +7,7 @@ import PandingRentals from "./PendingRentals"; // Doğru dosya yoluna göre ayar
 
 const BookHistoryPage: React.FC = () => {
   return (
-    <Box sx={{ mt: 5, mb: 5, width: "100%" }}>
+    <Box sx={{ width: "100%" }}>
       <Grid>
         <Paper elevation={3} sx={{ p: 3 }}>
           <PandingRentals />

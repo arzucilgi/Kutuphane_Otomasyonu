@@ -45,8 +45,8 @@ import BookDetailDialog from "../StudentDashboard/BookDetailDialog";
 // Stil tanımlamaları
 const StyledCard = styled(Card)(({ theme }) => ({
   width: "100%",
-  maxWidth: 380,
-  height: "350px",
+  maxWidth: 330,
+  height: "330px",
   display: "flex",
   flexDirection: "row",
   cursor: "pointer",
@@ -248,7 +248,7 @@ function Books() {
         margin: "20px auto",
         border: "1px solid #ccc",
         borderRadius: 2,
-        p: 4,
+        p: 2,
         display: "flex",
         flexDirection: "column",
         gap: 2,

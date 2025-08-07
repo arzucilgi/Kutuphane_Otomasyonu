@@ -191,7 +191,7 @@ const StudentRentalHistoryPage = () => {
                 <Card
                   sx={{
                     height: "100%",
-                    width: "250px",
+                    width: "230px",
                     borderRadius: 3,
                     boxShadow: 4,
                     transition: "all 0.3s ease",

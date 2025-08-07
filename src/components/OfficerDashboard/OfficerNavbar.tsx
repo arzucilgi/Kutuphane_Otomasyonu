@@ -43,31 +43,6 @@ const items = [
     icon: <HistoryEduIcon sx={{ fontSize: "30px", color: "black" }} />,
     to: "/officerDashboard/rental-history",
   },
-  // {
-  //   label: "Ceza İşlemleri",
-  //   icon: <WarningAmberIcon sx={{ fontSize: "30px", color: "black" }} />,
-  //   to: "penalty-operations",
-  // },
-  //   {
-  //     label: "Öğrenciye Mesaj",
-  //     icon: <ChatIcon sx={{ fontSize: "30px", color: "black" }} />,
-  //     to: "send-message",
-  //   },
-  //   {
-  //     label: "Kitap Kirala",
-  //     icon: <ShoppingCartIcon sx={{ fontSize: "30px", color: "black" }} />,
-  //     to: "rent-book",
-  //   },
-  // {
-  //   label: "Kitap İade",
-  //   icon: <AssignmentReturnIcon sx={{ fontSize: "30px", color: "black" }} />,
-  //   to: "return-book",
-  // },
-  // {
-  //   label: "Kiralama Takibi",
-  //   icon: <ManageHistoryIcon sx={{ fontSize: "30px", color: "black" }} />,
-  //   to: "rental-tracking",
-  // },
   {
     label: "Raporlar",
     icon: <QueryStatsIcon sx={{ fontSize: "30px", color: "black" }} />,
@@ -78,20 +53,15 @@ const items = [
     icon: <BarChartIcon sx={{ fontSize: "30px", color: "black" }} />,
     to: "statistics",
   },
-  //   {
-  //     label: "Kullanıcı Girişleri",
-  //     icon: (
-  //       <SupervisedUserCircleIcon sx={{ fontSize: "30px", color: "black" }} />
-  //     ),
-  //     to: "user-logs",
-  //   },
 ];
 
 const OfficerNavbar = () => {
   const session = useSession();
   const navigate = useNavigate();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  // lg ve altındaki ekranlarda drawer açık-kapalı kontrolü
+  const isMobile = useMediaQuery(theme.breakpoints.down("xl"));
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const userName =
