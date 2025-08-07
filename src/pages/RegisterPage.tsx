@@ -10,10 +10,8 @@ import {
   Paper,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import kutuphaneLogo from "../assets/kütüphane.png";
-import useIfUserExistsRedirectToDashboard from "../hooks/useIfUserExistsRedirectToDashboard";
 import { registerUser } from "../services/authService";
 
 const Register = () => {

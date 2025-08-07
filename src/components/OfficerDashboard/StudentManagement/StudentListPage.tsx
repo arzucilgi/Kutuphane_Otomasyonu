@@ -28,7 +28,7 @@ interface Student {
   olusturulma_tarihi: string;
 }
 
-const SUPABASE_BASE_URL = process.env.REACT_APP_SUPABASE_URL!;
+const SUPABASE_BASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 const StudentListPage = () => {
   const [students, setStudents] = useState<Student[]>([]);

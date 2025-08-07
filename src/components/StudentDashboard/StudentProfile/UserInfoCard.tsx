@@ -121,8 +121,11 @@ const UserInfoCard: React.FC<Props> = ({ userData, onUpdate }) => {
   return (
     <Card
       sx={{
-        width: "70%",
-        height: "80%",
+        position: "absolute",
+        top: "20%",
+        left: "30%",
+        width: "25%",
+        height: "45%",
         mx: "auto",
         p: 3,
         borderRadius: 5,

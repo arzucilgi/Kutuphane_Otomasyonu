@@ -26,10 +26,6 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [success, setSuccess] = useState(false);
-  const [userProfile, setUserProfile] = useState<{
-    rol?: string;
-    gorev?: string;
-  } | null>(null);
 
   const navigate = useNavigate();
 

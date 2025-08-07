@@ -19,6 +19,11 @@ import { useNavigate } from "react-router-dom";
 import type { Kitap } from "../../services/StudentServices/bookTypeService";
 import { supabase } from "../../lib/supabaseClient";
 
+interface Kullanici {
+  id: string;
+  ad_soyad: string;
+}
+
 interface Comment {
   id: string;
   kullanici_id: string;
@@ -26,13 +31,8 @@ interface Comment {
   yorum: string;
   puan: number;
   tarih: string;
-  kullanicilar:
-    | {
-        id: string;
-        ad_soyad: string;
-      }[]
-    | null;
-  kullanici_adi?: string; // for joins
+  kullanicilar: Kullanici | null;
+  kullanici_adi?: string;
 }
 
 const BookDetailItem = ({
@@ -72,16 +72,28 @@ const BookDetailDialog: React.FC<BookDetailDialogProps> = ({
     const { data, error } = await supabase
       .from("yorumlar")
       .select(
-        `id, kullanici_id, kitap_id, yorum, puan, tarih, kullanicilar: kullanicilar (id, ad_soyad)`
+        `
+        id,
+        kullanici_id,
+        kitap_id,
+        yorum,
+        puan,
+        tarih,
+        kullanicilar (id, ad_soyad)
+      `
       )
       .eq("kitap_id", kitapId)
       .order("tarih", { ascending: false });
 
     if (!error && data) {
-      const commentsWithUser = data.map((item) => ({
+      // Eğer supabase yanlışlıkla dizi döndürüyorsa buradan kontrol edelim
+      const commentsWithUser: Comment[] = data.map((item: any) => ({
         ...item,
-        kullanici_adi: item.kullanicilar?.ad_soyad ?? "Anonymous",
+        kullanici_adi: Array.isArray(item.kullanicilar)
+          ? item.kullanicilar[0]?.ad_soyad ?? "Anonymous"
+          : item.kullanicilar?.ad_soyad ?? "Anonymous",
       }));
+
       setComments(commentsWithUser);
     } else {
       console.error("Failed to load comments", error);

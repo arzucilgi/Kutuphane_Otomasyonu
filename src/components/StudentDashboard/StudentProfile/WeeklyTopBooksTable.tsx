@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -17,11 +17,11 @@ const WeeklyTopBooksChart = () => {
   const [books, setBooks] = useState<any[]>([]);
 
   const colors = [
-    "#90caf9", // pastel mavi (orijinal #1976d2)
-    "#81c784", // pastel yeşil (orijinal #388e3c)
-    "#ffb74d", // pastel turuncu (orijinal #f57c00)
-    "#e57373", // pastel kırmızı (orijinal #d32f2f)
-    "#ba68c8", // pastel mor (orijinal #7b1fa2)
+    "#90caf9", // pastel mavi
+    "#81c784", // pastel yeşil
+    "#ffb74d", // pastel turuncu
+    "#e57373", // pastel kırmızı
+    "#ba68c8", // pastel mor
   ];
 
   useEffect(() => {
@@ -73,14 +73,11 @@ const WeeklyTopBooksChart = () => {
               interval={0}
               height={20}
               tick={({ x, y, payload }) => {
-                // kitap adını al
                 const value = payload.value;
-                // o kitap için dizideki sırasını bul
                 const bookIndex = books.findIndex(
                   (book) => book.kitap_adi === value
                 );
                 const fillColor = colors[bookIndex % colors.length];
-                // çok kelimeli isimleri alt alta yaz
                 const lines = value.split(" ");
 
                 return (
@@ -100,7 +97,6 @@ const WeeklyTopBooksChart = () => {
                 );
               }}
             />
-
             <YAxis />
             <Tooltip />
             <Legend
@@ -115,7 +111,7 @@ const WeeklyTopBooksChart = () => {
               }}
             />
             <Bar dataKey="kira_sayisi" name="Okunma Sayısı">
-              {books.map((entry, index) => (
+              {books.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={colors[index % colors.length]}

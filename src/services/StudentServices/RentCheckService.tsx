@@ -12,8 +12,8 @@ export const rentBookIfAllowed = async (
       .select("id")
       .eq("kullanici_id", user_id)
       .eq("kitap_id", book_id)
-      .is("teslim_edilme_tarihi", null)
-      .eq("aktif", true);
+      .is("teslim_edilme_tarihi", null);
+    // .eq("aktif", true);
 
     if (existingError) throw existingError;
 

@@ -7,7 +7,6 @@ import {
   Stack,
   Alert,
 } from "@mui/material";
-import { supabase } from "../../lib/supabaseClient";
 import { useSession } from "@supabase/auth-helpers-react";
 import { addEmployeeService } from "../../services/ManagerServices/ManagerProfileServices/addEmployeeService";
 

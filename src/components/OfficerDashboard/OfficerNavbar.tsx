@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Grid,
@@ -14,23 +14,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "../../lib/supabaseClient";
 import kutuphaneLogo from "../../assets/kütüphane.png";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
+
 import PersonIcon from "@mui/icons-material/Person";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks"; // Kitap işlemleri
-import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd"; // Kitap ekleme
-import EditNoteIcon from "@mui/icons-material/EditNote"; // Kitap düzenleme
-import DeleteIcon from "@mui/icons-material/Delete"; // Kitap silme
-import MenuBookIcon from "@mui/icons-material/MenuBook"; // Raf/Kategori işlemleri
 import PeopleIcon from "@mui/icons-material/People"; // Öğrenciler
 import HistoryEduIcon from "@mui/icons-material/HistoryEdu"; // Kiralama geçmişi
-import WarningAmberIcon from "@mui/icons-material/WarningAmber"; // Ceza işlemleri
-import ChatIcon from "@mui/icons-material/Chat"; // Bilgilendirme/Mesaj
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart"; // Kitap kiralama
-import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn"; // Kitap iade
 import QueryStatsIcon from "@mui/icons-material/QueryStats"; // Raporlar
 import BarChartIcon from "@mui/icons-material/BarChart"; // İstatistik
-import ManageHistoryIcon from "@mui/icons-material/ManageHistory"; // Kiralama yönetimi
-import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle"; // Log / giriş çıkış
 
 const items = [
   {

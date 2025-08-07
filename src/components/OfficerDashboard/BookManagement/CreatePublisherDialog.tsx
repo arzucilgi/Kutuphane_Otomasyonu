@@ -10,7 +10,6 @@ import {
   Autocomplete,
   Alert,
   Typography,
-  Box,
 } from "@mui/material";
 import { supabase } from "../../../lib/supabaseClient";
 import AddIcon from "@mui/icons-material/Add";

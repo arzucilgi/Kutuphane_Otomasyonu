@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -19,7 +19,6 @@ const RentBookPage: React.FC = () => {
   const [book] = useState<any>(kitapFromState);
   const [days, setDays] = useState<number>(7);
   const [renting, setRenting] = useState(false);
-  const [overLimit, setOverLimit] = useState(false);
 
   const today = new Date();
   const returnDate = new Date(today);

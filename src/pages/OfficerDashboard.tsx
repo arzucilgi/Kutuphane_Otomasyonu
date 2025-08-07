@@ -1,6 +1,5 @@
 import { Outlet } from "react-router-dom";
 import { Box } from "@mui/material";
-import ManagerNavbar from "../components/ManagerDashboard/ManagerNavbar";
 import OfficerNavbar from "../components/OfficerDashboard/OfficerNavbar";
 
 const OfficerDashboard = () => {

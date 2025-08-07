@@ -31,7 +31,7 @@ const FavoriteBooksTable: React.FC = () => {
   const [selectedKitap, setSelectedKitap] = useState<Kitap | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 

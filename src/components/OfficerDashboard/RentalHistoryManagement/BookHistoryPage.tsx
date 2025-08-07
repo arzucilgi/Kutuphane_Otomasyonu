@@ -1,20 +1,11 @@
 // BookHistoryPage.tsx
 
 import React from "react";
-import {
-  Container,
-  Grid,
-  Typography,
-  Paper,
-  useTheme,
-  Box,
-} from "@mui/material";
+import { Grid, Paper, Box } from "@mui/material";
 import UndeliveredBooks from "./UndeliveredBooks";
 import PandingRentals from "./PendingRentals"; // Doğru dosya yoluna göre ayarla
 
 const BookHistoryPage: React.FC = () => {
-  const theme = useTheme();
-
   return (
     <Box sx={{ mt: 5, mb: 5, width: "100%" }}>
       <Grid>

@@ -1,6 +1,5 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { supabase } from "../../../lib/supabaseClient";
 import {
   Card,
   CardContent,
@@ -47,7 +46,7 @@ const SingleBookHistoryPage = () => {
 
       try {
         const rentalData = await fetchBookHistory(bookId);
-        setRentals(rentalData);
+        setRentals(rentalData as Kiralama[]);
 
         const kitaplar = await fetchKitaplar();
         const selectedBook = kitaplar.find((kitap) => kitap.id === bookId);

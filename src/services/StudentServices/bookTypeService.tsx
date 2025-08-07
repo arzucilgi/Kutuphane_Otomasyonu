@@ -42,6 +42,7 @@ export interface Kiralama {
     eposta: string;
   };
   kitaplar: {
+    yazarlar: any;
     id: string;
     kitap_adi: string;
     yayinevleri: { isim: string }[];

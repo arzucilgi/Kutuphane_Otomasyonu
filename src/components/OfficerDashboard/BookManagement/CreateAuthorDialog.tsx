@@ -59,7 +59,7 @@ const ConfirmDialog = ({
   </Dialog>
 );
 
-const AuthorManagerDialog = ({ open, onClose }: Props) => {
+const CreateAuthorDialog = ({ open, onClose }: Props) => {
   const [mode, setMode] = useState<"none" | "create" | "update" | "delete">(
     "none"
   );
@@ -126,6 +126,7 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
     }
 
     openConfirm("Bu yazarı eklemek istediğinize emin misiniz?", async () => {
+      setLoading(true);
       const isim = `${form.ad} ${form.soyad}`;
       const { error } = await supabase.from("yazarlar").insert({
         isim,
@@ -140,6 +141,7 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
         clearForm();
         fetchYazarlar();
       }
+      setLoading(false);
     });
   };
 
@@ -149,6 +151,7 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
     openConfirm(
       "Bu yazarı güncellemek istediğinize emin misiniz?",
       async () => {
+        setLoading(true);
         const isim = `${form.ad} ${form.soyad}`;
         const { error } = await supabase
           .from("yazarlar")
@@ -166,6 +169,7 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
           clearForm();
           fetchYazarlar();
         }
+        setLoading(false);
       }
     );
   };
@@ -192,6 +196,7 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
     }
 
     openConfirm("Bu yazarı silmek istediğinize emin misiniz?", async () => {
+      setLoading(true);
       const { error } = await supabase
         .from("yazarlar")
         .delete()
@@ -203,6 +208,7 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
         clearForm();
         fetchYazarlar();
       }
+      setLoading(false);
     });
   };
 
@@ -226,6 +232,7 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
         <DialogTitle sx={{ fontWeight: "bold" }}>Yazar İşlemleri</DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1}>
+            {loading && <Alert severity="info">Yükleniyor...</Alert>}
             {feedback && <Alert severity={feedback.type}>{feedback.msg}</Alert>}
 
             <Stack direction="row" spacing={2}>
@@ -366,4 +373,4 @@ const AuthorManagerDialog = ({ open, onClose }: Props) => {
   );
 };
 
-export default AuthorManagerDialog;
+export default CreateAuthorDialog;

@@ -1,4 +1,3 @@
-import React from "react";
 import { Outlet } from "react-router-dom";
 import StudentNavbar from "../components/StudentDashboard/StudentNavbar ";
 import { Box } from "@mui/material";

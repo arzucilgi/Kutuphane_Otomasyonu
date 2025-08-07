@@ -66,7 +66,7 @@ const UserRentHistoryTable: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const rowsPerPage = 8;
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 

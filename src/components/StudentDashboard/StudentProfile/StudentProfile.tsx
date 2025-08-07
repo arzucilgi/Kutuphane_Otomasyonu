@@ -107,36 +107,24 @@ const StudentProfile: React.FC = () => {
       </Box>
 
       {/* Modal */}
-      <Modal open={openModal} onClose={() => setOpenModal(false)}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            borderRadius: 3,
-            p: 4,
-            width: 500,
-            height: 600,
-            maxWidth: "90%",
-            outline: "none",
-          }}
-        >
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            mb={2}
-            textAlign="center"
-            color="primary"
-          >
-            Kullanıcı Bilgileri
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          {/* Güncelleme callback'i ile UserInfoCard */}
-          <UserInfoCard userData={userData} onUpdate={handleUserUpdate} />
-        </Box>
+      <Modal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        sx={
+          {
+            // position: "absolute",
+            // top: "50%",
+            // left: "50%",
+            // transform: "translate(-50%, -50%)",
+            // boxShadow: 24,
+            // borderRadius: 3,
+            // p: 4,
+            // width: 500,
+            // height: 600,
+          }
+        }
+      >
+        <UserInfoCard userData={userData} onUpdate={handleUserUpdate} />
       </Modal>
 
       {/* İstatistik ve tablolar */}
