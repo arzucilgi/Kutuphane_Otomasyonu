@@ -74,7 +74,7 @@ const StudentListPage = () => {
       const token = session.data.session?.access_token;
 
       const res = await fetch(
-        "https://orotnubobvsozainwgas.supabase.co/functions/v1/smooth-action",
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL!}/functions/v1/smooth-action`,
         {
           method: "POST",
           headers: {
@@ -118,7 +118,8 @@ const StudentListPage = () => {
       }
 
       const res = await fetch(
-        "https://orotnubobvsozainwgas.supabase.co/functions/v1/bright-processor",
+        `${process.env
+          .NEXT_PUBLIC_SUPABASE_URL!}/functions/v1/bright-processor`,
         {
           method: "POST",
           headers: {
