@@ -64,9 +64,10 @@ function App() {
         <Route
           path="/officerDashboard"
           element={
-            <ProtectedRoute>
-              <OfficerDashboard />
-            </ProtectedRoute>
+            // <ProtectedRoute>
+            //   <OfficerDashboard />
+            // </ProtectedRoute>
+            <OfficerDashboard />
           }
         >
           <Route path="book-management" element={<BookManagement />}>
