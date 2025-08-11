@@ -110,9 +110,22 @@ const PendingRentals: React.FC = () => {
     setApprovingId(id);
     setConfirmDialogOpen(false); // Dialogu kapat
 
+    // Giriş yapan memurun id'sini al
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      setError("Giriş yapan memur bilgisi alınamadı.");
+      setApprovingId(null);
+      return;
+    }
+
+    // Kiralama onayını memur id'siyle birlikte güncelle
     const { error } = await supabase
       .from("kiralamalar")
-      .update({ aktif: true })
+      .update({ aktif: true, kiralayan_memur_id: user.id })
       .eq("id", id);
 
     if (error) {

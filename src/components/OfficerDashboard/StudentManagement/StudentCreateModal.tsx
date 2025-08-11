@@ -11,6 +11,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { registerUser } from "../../../services/authService";
 import ConfirmDialog from "./ConfirmDialog";
+import { supabase } from "../../../lib/supabaseClient";
 
 interface Props {
   open: boolean;
@@ -37,7 +38,18 @@ const StudentCreateModal = ({ open, onClose, onStudentAdded }: Props) => {
 
   const handleConfirm = async () => {
     setConfirmOpen(false);
-    const result = await registerUser(adSoyad, eposta, password);
+    // Giriş yapan kullanıcıyı al
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      setErrorMsg("Giriş yapan kullanıcı bilgisi alınamadı.");
+      toast.error("Giriş yapan kullanıcı bilgisi alınamadı.");
+      return;
+    }
+    const result = await registerUser(adSoyad, eposta, password, user.id);
 
     if (!result.success) {
       setErrorMsg(result.message || "Kayıt işlemi başarısız.");

@@ -21,6 +21,7 @@ import StudentListPage from "./components/OfficerDashboard/StudentManagement/Stu
 import SingleBookHistoryPage from "./components/OfficerDashboard/RentalHistoryManagement/SingleBookHistoryPage";
 import BookHistoryPage from "./components/OfficerDashboard/RentalHistoryManagement/BookHistoryPage";
 import StudentRentalHistoryPage from "./components/OfficerDashboard/RentalHistoryManagement/StudentRentalHistoryPage";
+import OfficerProfile from "./components/OfficerDashboard/ProfileManagement/OfficerProfile";
 
 function App() {
   return (
@@ -64,10 +65,9 @@ function App() {
         <Route
           path="/officerDashboard"
           element={
-            // <ProtectedRoute>
-            //   <OfficerDashboard />
-            // </ProtectedRoute>
-            <OfficerDashboard />
+            <ProtectedRoute>
+              <OfficerDashboard />
+            </ProtectedRoute>
           }
         >
           <Route path="book-management" element={<BookManagement />}>
@@ -83,6 +83,7 @@ function App() {
             element={<StudentRentalHistoryPage />}
           />
           <Route path="students" element={<StudentListPage />} />
+          <Route path="profile" element={<OfficerProfile />} />
         </Route>
       </Routes>
 

@@ -131,6 +131,17 @@ const UndeliveredBooks: React.FC = () => {
 
     setSubmittingId(selectedId);
     setConfirmOpen(false);
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      setError("Giriş yapan memur bilgisi alınamadı.");
+      setSubmittingId(null);
+      setSelectedId(null);
+      return;
+    }
 
     const rental = rentals.find((r) => r.id === selectedId);
     if (!rental) {
@@ -154,7 +165,10 @@ const UndeliveredBooks: React.FC = () => {
 
     const { error: teslimError } = await supabase
       .from("kiralamalar")
-      .update({ teslim_edilme_tarihi: new Date().toISOString() })
+      .update({
+        teslim_edilme_tarihi: new Date().toISOString(),
+        teslim_alan_memur_id: user.id,
+      })
       .eq("id", selectedId);
 
     if (teslimError) {
