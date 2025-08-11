@@ -70,6 +70,7 @@ function App() {
             </ProtectedRoute>
           }
         >
+          <Route index element={<OfficerProfile />} />
           <Route path="book-management" element={<BookManagement />}>
             <Route index element={<BookList />} />
           </Route>

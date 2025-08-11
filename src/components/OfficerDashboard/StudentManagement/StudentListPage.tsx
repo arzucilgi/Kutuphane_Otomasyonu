@@ -173,8 +173,8 @@ const StudentListPage = () => {
     <Box display="flex" justifyContent="center" p={4}>
       <Box
         sx={{
-          width: "100%",
-          maxWidth: 1200,
+          width: "90%",
+          // maxWidth: 1200,
           p: 3,
           borderRadius: 4,
           bgcolor: "#f9f9f9",

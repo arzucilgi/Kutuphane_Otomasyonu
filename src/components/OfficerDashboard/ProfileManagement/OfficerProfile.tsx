@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import OfficerInfoCard from "../ProfileManagement/OfficerInfoCard";
-import OfficerRecentActivities from "../ProfileManagement/OfficerRecentActivities"; // Yeni komponent
-import { Box, CircularProgress, Alert } from "@mui/material";
+import OfficerRecentActivities from "../ProfileManagement/OfficerRecentActivities";
+import { Box, CircularProgress, Alert, Paper, Typography } from "@mui/material";
 import { getLoggedInOfficer } from "../../../services/officerService";
 import {
   fetchRecentBooks,
   fetchRecentRentals,
   fetchRecentStudents,
-} from "../../../services/officerActivityService.tsx"; // Örnek servisler (aşağıda yazabilirim)
+  fetchRecentReturnedBooks, // Servisi buraya ekle
+} from "../../../services/officerActivityService.tsx";
 
 interface Officer {
-  id: string; // id ekledim ki aktiviteleri çekebilelim
+  id: string;
   name: string;
   surname: string;
   title: string;
@@ -23,6 +24,7 @@ const OfficerProfile = () => {
   const [officer, setOfficer] = useState<Officer | null>(null);
   const [recentBooks, setRecentBooks] = useState<any[]>([]);
   const [recentRentals, setRecentRentals] = useState<any[]>([]);
+  const [recentReturnedBooks, setRecentReturnedBooks] = useState<any[]>([]);
   const [recentStudents, setRecentStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,14 +35,15 @@ const OfficerProfile = () => {
         const officerData = await getLoggedInOfficer();
         setOfficer(officerData);
 
-        // Memurun yaptığı son işlemleri çek
         const books = await fetchRecentBooks(officerData.id);
         const rentals = await fetchRecentRentals(officerData.id);
         const students = await fetchRecentStudents(officerData.id);
+        const returnedBooks = await fetchRecentReturnedBooks(officerData.id);
 
         setRecentBooks(books);
         setRecentRentals(rentals);
         setRecentStudents(students);
+        setRecentReturnedBooks(returnedBooks);
       } catch (err: any) {
         setError(err.message || "Bilinmeyen bir hata oluştu");
       } finally {
@@ -53,38 +56,106 @@ const OfficerProfile = () => {
 
   if (loading)
     return (
-      <Box display="flex" justifyContent="center" mt={4}>
-        <CircularProgress />
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="70vh"
+      >
+        <CircularProgress size={60} />
       </Box>
     );
 
   if (error)
     return (
-      <Alert severity="error" sx={{ mt: 4, mx: "auto", maxWidth: 400 }}>
-        {error}
-      </Alert>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="70vh"
+      >
+        <Alert severity="error" sx={{ width: "90%", maxWidth: 500 }}>
+          {error}
+        </Alert>
+      </Box>
     );
 
   if (!officer)
     return (
-      <Alert severity="warning" sx={{ mt: 4, mx: "auto", maxWidth: 400 }}>
-        Memur bilgisi bulunamadı.
-      </Alert>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="70vh"
+      >
+        <Alert severity="warning" sx={{ width: "90%", maxWidth: 500 }}>
+          Memur bilgisi bulunamadı.
+        </Alert>
+      </Box>
     );
 
   return (
-    <Box sx={{ maxWidth: 700, mx: "auto", mt: 4, px: 2 }}>
-      <OfficerInfoCard
-        {...officer}
-        onEdit={() => alert("Profil düzenleme ekranı açılacak")}
-      />
+    <Box
+      sx={{
+        maxWidth: "95%",
+        mx: "auto",
+        mt: 6,
+        px: 3,
+        pb: 6,
+        display: "flex",
+        flexDirection: "column",
+        gap: 5,
+      }}
+    >
+      <Paper
+        elevation={8}
+        sx={{
+          p: 4,
+          borderRadius: 4,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+          backgroundColor: "#f9f9f9",
+        }}
+      >
+        <Typography
+          variant="h5"
+          fontWeight={700}
+          mb={3}
+          color="primary.main"
+          textAlign={{ xs: "center", md: "center", lg: "left" }}
+        >
+          Memur Profili
+        </Typography>
+        <OfficerInfoCard
+          {...officer}
+          onEdit={() => alert("Profil düzenleme ekranı açılacak")}
+        />
+      </Paper>
 
-      {/* Aktivite geçmişi */}
-      <OfficerRecentActivities
-        recentBooks={recentBooks}
-        recentRentals={recentRentals}
-        recentStudents={recentStudents}
-      />
+      <Paper
+        elevation={8}
+        sx={{
+          p: 4,
+          borderRadius: 4,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+          backgroundColor: "#f9f9f9",
+        }}
+      >
+        <Typography
+          variant="h5"
+          fontWeight={700}
+          mb={4}
+          color="primary.main"
+          textAlign={{ xs: "center", md: "center", lg: "left" }}
+        >
+          Son Aktiviteler
+        </Typography>
+        <OfficerRecentActivities
+          recentBooks={recentBooks}
+          recentRentals={recentRentals}
+          recentStudents={recentStudents}
+          recentReturnedBooks={recentReturnedBooks}
+        />
+      </Paper>
     </Box>
   );
 };

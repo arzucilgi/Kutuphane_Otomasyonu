@@ -6,9 +6,9 @@ import {
   CardHeader,
   Avatar,
   Typography,
-  Stack,
   Divider,
   IconButton,
+  Box,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 
@@ -41,7 +41,12 @@ const OfficerInfoCard: React.FC<OfficerCardProps> = ({
   });
 
   return (
-    <Card sx={{ maxWidth: 400, borderRadius: 3, boxShadow: 3 }}>
+    <Card
+      sx={{
+        width: "100%",
+        borderRadius: 3,
+      }}
+    >
       <CardHeader
         avatar={
           <Avatar sx={{ width: 56, height: 56 }}>
@@ -62,17 +67,27 @@ const OfficerInfoCard: React.FC<OfficerCardProps> = ({
       />
       <Divider />
       <CardContent>
-        <Stack spacing={1}>
-          <Typography variant="body2">
+        <Box
+          sx={{
+            display: "flex",
+            gap: 3, // öğeler arası boşluk
+            flexWrap: "wrap", // çok uzun olursa alt satıra geçer
+            fontSize: "0.875rem", // biraz daha küçük font (body2 default)
+            color: "text.secondary",
+            alignItems: "center",
+            whiteSpace: "nowrap", // satır içi öğeler taşmasın
+          }}
+        >
+          <Typography component="span">
             <strong>E-posta:</strong> {email}
           </Typography>
-          <Typography variant="body2">
+          <Typography component="span">
             <strong>Telefon:</strong> {phone}
           </Typography>
-          <Typography variant="body2">
+          <Typography component="span">
             <strong>Oluşturulma:</strong> {formattedDate}
           </Typography>
-        </Stack>
+        </Box>
       </CardContent>
     </Card>
   );

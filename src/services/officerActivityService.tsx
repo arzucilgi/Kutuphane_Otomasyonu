@@ -56,3 +56,25 @@ export const fetchRecentStudents = async (officerId: string) => {
   if (error) throw error;
   return data || [];
 };
+
+// Son teslim alınan kitaplar (teslim alan memur bazında)
+export const fetchRecentReturnedBooks = async (officerId: string) => {
+  const { data, error } = await supabase
+    .from("kiralamalar")
+    .select(
+      `
+      id,
+      kitaplar(kitap_adi, yazarlar (isim)),
+      kullanicilar(ad_soyad),
+      kiralama_tarihi,
+      teslim_edilme_tarihi
+    `
+    )
+    .eq("teslim_alan_memur_id", officerId) // Burayı teslim alan memurun ID'si olan alanla değiştir
+    .not(" teslim_edilme_tarihi", "is", null) // teslim_tarihi null olmayanlar (teslim alınmış)
+    .order(" teslim_edilme_tarihi", { ascending: false })
+    .limit(5);
+
+  if (error) throw error;
+  return data || [];
+};
