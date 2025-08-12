@@ -78,3 +78,32 @@ export const fetchRecentReturnedBooks = async (officerId: string) => {
   if (error) throw error;
   return data || [];
 };
+
+export const fetchRecentPaidPenalties = async (officerId: string) => {
+  // Eğer officerId özel filtre gerektirmiyorsa kaldırabilirsiniz.
+  // Burada tüm ödenmiş cezaları son tarihe göre getiriyoruz.
+  const { data, error } = await supabase
+    .from("cezalar")
+    .select(
+      `
+      id,
+      baslangic,
+      bitis,
+      aciklama,
+      odeme_tarihi,
+      odeme_durumu,
+      kullanici_id,
+      kullanicilar(ad_soyad, eposta)
+    `
+    )
+    .eq("odeme_durumu", true)
+    .eq("onaylayan_memur_id", officerId)
+    .order("odeme_tarihi", { ascending: false })
+    .limit(5); // Son 10 ödenmiş ceza
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};

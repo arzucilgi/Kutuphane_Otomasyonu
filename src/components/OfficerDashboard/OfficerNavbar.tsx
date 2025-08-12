@@ -20,7 +20,6 @@ import LibraryBooksIcon from "@mui/icons-material/LibraryBooks"; // Kitap işlem
 import PeopleIcon from "@mui/icons-material/People"; // Öğrenciler
 import HistoryEduIcon from "@mui/icons-material/HistoryEdu"; // Kiralama geçmişi
 import QueryStatsIcon from "@mui/icons-material/QueryStats"; // Raporlar
-import BarChartIcon from "@mui/icons-material/BarChart"; // İstatistik
 
 const items = [
   {

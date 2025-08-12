@@ -20,11 +20,13 @@ interface Penalty {
   bitis: string;
   aciklama: string;
   odeme_durumu: boolean;
+  odeme_tarihi?: string;
   kullanici_id: string;
   kullanicilar?: {
     ad_soyad: string;
     eposta: string;
   };
+  onaylayan_memur_id?: string;
 }
 
 const Penalties: React.FC = () => {
@@ -40,6 +42,27 @@ const Penalties: React.FC = () => {
   const [page, setPage] = useState(1);
   const itemsPerPage = 4;
 
+  // // Giriş yapmış kullanıcının bilgisi
+  // const user = supabase.auth.getUser(); // Bu async olduğu için biraz beklemek lazım
+
+  // Burada state olarak userId tutacağız, async işlemi useEffect içinde yapacağız
+  const [officerId, setOfficerId] = useState<string | null>(null);
+
+  // useEffect ile giriş yapmış kullanıcı id'sini al
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error || !data.user) {
+        setError("Kullanıcı bilgisi alınamadı. Lütfen giriş yapınız.");
+        setOfficerId(null);
+      } else {
+        setOfficerId(data.user.id);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
   const fetchPenalties = async () => {
     setLoading(true);
     setError(null);
@@ -48,7 +71,7 @@ const Penalties: React.FC = () => {
       .from("cezalar")
       .select(
         `
-        *,
+        * ,
         kullanicilar(ad_soyad, eposta)
       `
       )
@@ -76,20 +99,31 @@ const Penalties: React.FC = () => {
 
   const handleConfirmPay = async () => {
     if (!selectedPenalty) return;
+
+    if (!officerId) {
+      setError("Ödeme işlemi için memur ID'si bulunamadı.");
+      setConfirmOpen(false);
+      return;
+    }
+
     setConfirmOpen(false);
     setPayingId(selectedPenalty.id);
 
     const { error } = await supabase
       .from("cezalar")
-      .update({ odeme_durumu: true })
+      .update({
+        odeme_durumu: true,
+        odeme_tarihi: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+        onaylayan_memur_id: officerId,
+      })
       .eq("id", selectedPenalty.id);
 
     if (error) {
-      setError("Ödeme alınırken hata oluştu.");
+      console.error("Ödeme update hatası:", error);
+      setError("Ödeme alınırken hata oluştu: " + error.message);
     } else {
       await fetchPenalties();
       setError(null);
-      // Sayfa sayısı değiştiyse ve son sayfa boş kaldıysa bir önceki sayfaya dön
       const newTotalPages = Math.ceil((penalties.length - 1) / itemsPerPage);
       if (page > newTotalPages && newTotalPages > 0) {
         setPage(newTotalPages);
@@ -148,7 +182,7 @@ const Penalties: React.FC = () => {
                   sx={{
                     boxShadow: 4,
                     borderRadius: 3,
-                    width: "345px", // sabit genişlik
+                    width: "345px",
                   }}
                 >
                   <CardContent>

@@ -7,7 +7,8 @@ import {
   fetchRecentBooks,
   fetchRecentRentals,
   fetchRecentStudents,
-  fetchRecentReturnedBooks, // Servisi buraya ekle
+  fetchRecentReturnedBooks,
+  fetchRecentPaidPenalties,
 } from "../../../services/officerActivityService.tsx";
 
 interface Officer {
@@ -26,6 +27,7 @@ const OfficerProfile = () => {
   const [recentRentals, setRecentRentals] = useState<any[]>([]);
   const [recentReturnedBooks, setRecentReturnedBooks] = useState<any[]>([]);
   const [recentStudents, setRecentStudents] = useState<any[]>([]);
+  const [recentPaidPenalties, setRecentPaidPenalties] = useState<any[]>([]); // ceza state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,11 +41,13 @@ const OfficerProfile = () => {
         const rentals = await fetchRecentRentals(officerData.id);
         const students = await fetchRecentStudents(officerData.id);
         const returnedBooks = await fetchRecentReturnedBooks(officerData.id);
+        const paidPenalties = await fetchRecentPaidPenalties(officerData.id); // ceza verisi çek
 
         setRecentBooks(books);
         setRecentRentals(rentals);
         setRecentStudents(students);
         setRecentReturnedBooks(returnedBooks);
+        setRecentPaidPenalties(paidPenalties); // ceza verisini state'e set et
       } catch (err: any) {
         setError(err.message || "Bilinmeyen bir hata oluştu");
       } finally {
@@ -154,6 +158,7 @@ const OfficerProfile = () => {
           recentRentals={recentRentals}
           recentStudents={recentStudents}
           recentReturnedBooks={recentReturnedBooks}
+          recentPaidPenalties={recentPaidPenalties}
         />
       </Paper>
     </Box>
