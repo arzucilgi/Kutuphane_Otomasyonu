@@ -38,6 +38,7 @@ export interface Kiralama {
   teslim_edilme_tarihi: string;
   son_teslim_tarihi: string;
   kullanicilar: {
+    id: string;
     ad_soyad: string;
     eposta: string;
   };

@@ -14,7 +14,10 @@ import {
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import { supabase } from "../../../lib/supabaseClient";
-import { getActiveRentalCount } from "../../../services/StudentServices/RentCheckService";
+import {
+  getActiveRentalCount,
+  getUnpaidPenaltyAmount,
+} from "../../../services/StudentServices/RentCheckService";
 
 interface Props {
   userData: any;
@@ -23,6 +26,7 @@ interface Props {
 
 const UserInfoCard: React.FC<Props> = ({ userData, onUpdate }) => {
   const [activeCount, setActiveCount] = useState<number | null>(null);
+  const [unpaidPenalty, setUnpaidPenalty] = useState<number | null>(null); // Yeni
 
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(userData.ad_soyad || "");
@@ -39,13 +43,21 @@ const UserInfoCard: React.FC<Props> = ({ userData, onUpdate }) => {
     fetchActiveCount();
   }, [userData.id]);
 
+  // Ceza tutarını çek
+  useEffect(() => {
+    const fetchPenaltyAmount = async () => {
+      const amount = await getUnpaidPenaltyAmount(userData.id);
+      setUnpaidPenalty(amount);
+    };
+    fetchPenaltyAmount();
+  }, [userData.id]);
+
   const handleSave = async () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
 
     try {
-      // 1. Mevcut oturumu al
       const { data: sessionData, error: sessionError } =
         await supabase.auth.getUser();
       if (sessionError) throw sessionError;
@@ -55,13 +67,11 @@ const UserInfoCard: React.FC<Props> = ({ userData, onUpdate }) => {
         throw new Error("Sadece kendi profilinizi güncelleyebilirsiniz.");
       }
 
-      // 2. Supabase Auth'ta e-posta değişikliği isteği
       const { error: authError } = await supabase.auth.updateUser({
         email: email,
       });
       if (authError) throw authError;
 
-      // 3. Supabase Auth kullanıcısını tekrar çek (güncellenmiş durumu almak için)
       const { data: updatedUserData, error: getUserError } =
         await supabase.auth.getUser();
       if (getUserError) throw getUserError;
@@ -69,7 +79,6 @@ const UserInfoCard: React.FC<Props> = ({ userData, onUpdate }) => {
       const isEmailConfirmed = updatedUserData?.user?.email === email;
 
       if (isEmailConfirmed) {
-        // 5. Kullanıcılar tablosunu güncelle
         const { error: dbError } = await supabase
           .from("kullanicilar")
           .update({
@@ -80,7 +89,6 @@ const UserInfoCard: React.FC<Props> = ({ userData, onUpdate }) => {
 
         if (dbError) throw dbError;
       } else {
-        // E-posta onaylanmadı, sadece isim güncellenebilir istersen:
         const { error: dbError } = await supabase
           .from("kullanicilar")
           .update({
@@ -96,10 +104,9 @@ const UserInfoCard: React.FC<Props> = ({ userData, onUpdate }) => {
         setIsEditing(false);
         if (onUpdate) onUpdate({ ...userData, ad_soyad: name });
         setLoading(false);
-        return; // Burada işlemi sonlandırıyoruz çünkü e-posta henüz onaylanmadı.
+        return;
       }
 
-      // 6. Güncelleme başarılı ise kullanıcıya bildir
       setSuccess("Bilgiler başarıyla güncellendi.");
       setIsEditing(false);
       if (onUpdate) onUpdate({ ...userData, ad_soyad: name, eposta: email });
@@ -125,7 +132,7 @@ const UserInfoCard: React.FC<Props> = ({ userData, onUpdate }) => {
         top: "20%",
         left: "30%",
         width: "25%",
-        height: "45%",
+        height: "50%",
         mx: "auto",
         p: 3,
         borderRadius: 5,
@@ -198,7 +205,7 @@ const UserInfoCard: React.FC<Props> = ({ userData, onUpdate }) => {
             />
           </Typography>
 
-          <Typography variant="body1" color="text.secondary">
+          {/* <Typography variant="body1" color="text.secondary">
             <strong>Ceza Tarihi:</strong>{" "}
             {userData.ceza_tarihi ? (
               <span style={{ color: "#d32f2f", fontWeight: 500 }}>
@@ -207,9 +214,19 @@ const UserInfoCard: React.FC<Props> = ({ userData, onUpdate }) => {
             ) : (
               <span style={{ color: "#388e3c", fontWeight: 500 }}>Yok</span>
             )}
+          </Typography> */}
+
+          {/* Yeni eklenen ceza borcu */}
+          <Typography variant="body1" color="text.secondary">
+            <strong>Ceza Borcu:</strong>{" "}
+            {unpaidPenalty !== null
+              ? unpaidPenalty > 0
+                ? `${unpaidPenalty} TL`
+                : "Yok"
+              : "Yükleniyor..."}
           </Typography>
 
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
             <strong>Aktif Kiralık Kitap:</strong>{" "}
             {activeCount !== null ? activeCount : "Yükleniyor..."}
           </Typography>

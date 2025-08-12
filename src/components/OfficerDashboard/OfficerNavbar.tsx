@@ -44,15 +44,15 @@ const items = [
     to: "/officerDashboard/rental-history",
   },
   {
-    label: "Raporlar",
+    label: "Ceza İşlemleri",
     icon: <QueryStatsIcon sx={{ fontSize: "30px", color: "black" }} />,
-    to: "reports",
+    to: "penalties",
   },
-  {
-    label: "İstatistikler",
-    icon: <BarChartIcon sx={{ fontSize: "30px", color: "black" }} />,
-    to: "statistics",
-  },
+  // {
+  //   label: "İstatistikler",
+  //   icon: <BarChartIcon sx={{ fontSize: "30px", color: "black" }} />,
+  //   to: "statistics",
+  // },
 ];
 
 const OfficerNavbar = () => {

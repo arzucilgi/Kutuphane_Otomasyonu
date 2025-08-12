@@ -109,7 +109,7 @@ export const fetchBookHistory = async (bookId: string) => {
     .from("kiralamalar")
     .select(
       `id, kiralama_tarihi, teslim_edilme_tarihi, son_teslim_tarihi,
-       kullanicilar(ad_soyad, eposta),
+       kullanicilar(id,ad_soyad, eposta),
        kitaplar(id, kitap_adi, yayinevleri:yayinevi_id(isim))`
     )
     .eq("kitap_id", bookId)
@@ -126,4 +126,32 @@ export const fetchBookHistory = async (bookId: string) => {
   }));
 
   return normalized;
+};
+
+export const getUnpaidPenaltyAmount = async (
+  userId: string
+): Promise<number> => {
+  const { data, error } = await supabase
+    .from("cezalar")
+    .select("aciklama")
+    .eq("kullanici_id", userId)
+    .eq("odeme_durumu", false);
+
+  if (error) {
+    console.error("Ceza verisi alınamadı:", error);
+    return 0;
+  }
+
+  // Ceza tutarını aciklama stringinden çek (örneğin "3 gün gecikme - 30 TL ceza")
+  // Burada " - XX TL ceza" kısmını parse ediyoruz
+  let total = 0;
+  data?.forEach((ceza) => {
+    if (!ceza.aciklama) return;
+    const match = ceza.aciklama.match(/(\d+)\s*TL/);
+    if (match && match[1]) {
+      total += parseInt(match[1], 10);
+    }
+  });
+
+  return total;
 };

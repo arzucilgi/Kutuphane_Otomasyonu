@@ -22,6 +22,7 @@ import SingleBookHistoryPage from "./components/OfficerDashboard/RentalHistoryMa
 import BookHistoryPage from "./components/OfficerDashboard/RentalHistoryManagement/BookHistoryPage";
 import StudentRentalHistoryPage from "./components/OfficerDashboard/RentalHistoryManagement/StudentRentalHistoryPage";
 import OfficerProfile from "./components/OfficerDashboard/ProfileManagement/OfficerProfile";
+import Penalties from "./components/OfficerDashboard/PenaltiesManagement/Penalties";
 
 function App() {
   return (
@@ -85,6 +86,7 @@ function App() {
           />
           <Route path="students" element={<StudentListPage />} />
           <Route path="profile" element={<OfficerProfile />} />
+          <Route path="penalties" element={<Penalties />} />
         </Route>
       </Routes>
 

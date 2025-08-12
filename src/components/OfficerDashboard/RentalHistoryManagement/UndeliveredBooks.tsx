@@ -1,5 +1,3 @@
-// UndeliveredBooks.tsx
-
 import React, { useEffect, useState } from "react";
 import {
   Card,
@@ -23,6 +21,11 @@ import SearchIcon from "@mui/icons-material/Search";
 
 const ITEMS_PER_PAGE = 5;
 
+interface PenaltyInfo {
+  days: number;
+  amount: number;
+}
+
 const UndeliveredBooks: React.FC = () => {
   const [rentals, setRentals] = useState<Kiralama[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,12 +35,20 @@ const UndeliveredBooks: React.FC = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [penaltyInfo, setPenaltyInfo] = useState<PenaltyInfo | null>(null);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Ceza kontrol fonksiyonu - rental bazında
+  const isRentalPenalized = (rental: Kiralama): boolean => {
+    if (!rental.son_teslim_tarihi) return false;
+    const today = new Date();
+    const dueDate = new Date(rental.son_teslim_tarihi);
+    return today > dueDate;
+  };
+
   const filteredRentals = rentals.filter((rental) => {
-    console.log(rental);
     const query = searchQuery.toLowerCase();
 
     const kitapAdi = rental.kitaplar?.[0]?.kitap_adi?.toLowerCase() || "";
@@ -74,6 +85,7 @@ const UndeliveredBooks: React.FC = () => {
         kitap_id,
         aktif,
         kullanicilar (
+          id,
           ad_soyad,
           eposta
         ),
@@ -123,6 +135,29 @@ const UndeliveredBooks: React.FC = () => {
 
   const handleOpenConfirm = (id: string) => {
     setSelectedId(id);
+
+    const rental = rentals.find((r) => r.id === id);
+    if (!rental) {
+      setPenaltyInfo(null);
+      setConfirmOpen(true);
+      return;
+    }
+
+    const today = new Date();
+    const dueDate = rental.son_teslim_tarihi
+      ? new Date(rental.son_teslim_tarihi)
+      : null;
+
+    if (dueDate && today > dueDate) {
+      const diffDays = Math.ceil(
+        (today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const amount = diffDays * 10;
+      setPenaltyInfo({ days: diffDays, amount });
+    } else {
+      setPenaltyInfo(null);
+    }
+
     setConfirmOpen(true);
   };
 
@@ -131,6 +166,7 @@ const UndeliveredBooks: React.FC = () => {
 
     setSubmittingId(selectedId);
     setConfirmOpen(false);
+
     const {
       data: { user },
       error: userError,
@@ -163,10 +199,41 @@ const UndeliveredBooks: React.FC = () => {
       return;
     }
 
+    const today = new Date();
+    const dueDate = rental.son_teslim_tarihi
+      ? new Date(rental.son_teslim_tarihi)
+      : null;
+
+    if (dueDate && today > dueDate) {
+      const diffDays = Math.ceil(
+        (today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const cezaTutari = diffDays * 10;
+
+      const { error: cezaError } = await supabase.from("cezalar").insert([
+        {
+          kullanici_id: rental.kullanicilar?.id,
+          kitap_id: kitapId,
+          baslangic: dueDate.toISOString().split("T")[0],
+          bitis: today.toISOString().split("T")[0],
+          aciklama: `${diffDays} gün gecikme - ${cezaTutari} TL ceza`,
+          odeme_durumu: false,
+        },
+      ]);
+
+      if (cezaError) {
+        console.error("Ceza eklenemedi:", cezaError);
+        setError("Ceza eklenirken hata oluştu.");
+        setSubmittingId(null);
+        setSelectedId(null);
+        return;
+      }
+    }
+
     const { error: teslimError } = await supabase
       .from("kiralamalar")
       .update({
-        teslim_edilme_tarihi: new Date().toISOString(),
+        teslim_edilme_tarihi: today.toISOString(),
         teslim_alan_memur_id: user.id,
       })
       .eq("id", selectedId);
@@ -190,6 +257,7 @@ const UndeliveredBooks: React.FC = () => {
 
     setSubmittingId(null);
     setSelectedId(null);
+    setPenaltyInfo(null);
   };
 
   const renderBooks = (books: any) => {
@@ -239,14 +307,13 @@ const UndeliveredBooks: React.FC = () => {
         </>
       ) : (
         <>
-          {" "}
           <Box
             display="flex"
             justifyContent="space-between"
             mb={3}
             flexDirection={isSmallScreen ? "column" : "row"}
-            gap={isSmallScreen ? 2 : 0} // Mobilde araya boşluk
-            alignItems={isSmallScreen ? "stretch" : "center"} // Mobilde tam genişlik, büyük ekranda ortala
+            gap={isSmallScreen ? 2 : 0}
+            alignItems={isSmallScreen ? "stretch" : "center"}
           >
             <Typography
               variant="h5"
@@ -269,7 +336,7 @@ const UndeliveredBooks: React.FC = () => {
               }}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
-                setPage(0); // Arama yapılınca ilk sayfaya dön
+                setPage(0);
               }}
               sx={{ width: "100%", maxWidth: 500 }}
             />
@@ -285,73 +352,81 @@ const UndeliveredBooks: React.FC = () => {
               margin: "auto",
             }}
           >
-            {paginatedRentals.map((rental) => (
-              <Card
-                key={rental.id}
-                sx={{
-                  width: 250,
-                  borderRadius: 4,
-                  boxShadow: 3,
-                  transition: "0.3s",
-                  "&:hover": {
-                    boxShadow: 8,
-                    transform: "scale(1.02)",
-                  },
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                }}
-              >
-                <CardContent>
-                  <Stack spacing={1}>
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {rental.kullanicilar?.ad_soyad}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {rental.kullanicilar?.eposta}
-                    </Typography>
+            {paginatedRentals.map((rental) => {
+              const penalized = isRentalPenalized(rental);
 
-                    <Divider />
+              return (
+                <Card
+                  key={rental.id}
+                  sx={{
+                    width: 250,
+                    borderRadius: 4,
+                    boxShadow: 3,
+                    transition: "0.3s",
+                    border: penalized ? "2px solid red" : undefined,
+                    "&:hover": {
+                      boxShadow: penalized ? 10 : 8,
+                      transform: "scale(1.02)",
+                      borderColor: penalized ? "darkred" : undefined,
+                    },
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <CardContent>
+                    <Stack spacing={1}>
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        {rental.kullanicilar?.ad_soyad}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {rental.kullanicilar?.eposta}
+                      </Typography>
 
-                    <Typography variant="body2">
-                      Kiralama Tarihi:{" "}
-                      {rental.kiralama_tarihi
-                        ? new Date(rental.kiralama_tarihi).toLocaleDateString()
-                        : "-"}
-                    </Typography>
-                    <Typography variant="body2">
-                      Son Teslim:{" "}
-                      {rental.son_teslim_tarihi
-                        ? new Date(
-                            rental.son_teslim_tarihi
-                          ).toLocaleDateString()
-                        : "-"}
-                    </Typography>
+                      <Divider />
 
-                    <Divider />
+                      <Typography variant="body2">
+                        Kiralama Tarihi:{" "}
+                        {rental.kiralama_tarihi
+                          ? new Date(
+                              rental.kiralama_tarihi
+                            ).toLocaleDateString()
+                          : "-"}
+                      </Typography>
+                      <Typography variant="body2">
+                        Son Teslim:{" "}
+                        {rental.son_teslim_tarihi
+                          ? new Date(
+                              rental.son_teslim_tarihi
+                            ).toLocaleDateString()
+                          : "-"}
+                      </Typography>
 
-                    <Typography variant="subtitle2" fontWeight="bold">
-                      Kitaplar
-                    </Typography>
+                      <Divider />
 
-                    {renderBooks(rental.kitaplar)}
+                      <Typography variant="subtitle2" fontWeight="bold">
+                        Kitaplar
+                      </Typography>
 
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleOpenConfirm(rental.id)}
-                      disabled={submittingId === rental.id}
-                      sx={{ mt: 2 }}
-                    >
-                      {submittingId === rental.id
-                        ? "Teslim Alınıyor..."
-                        : "Teslim Al"}
-                    </Button>
-                  </Stack>
-                </CardContent>
-              </Card>
-            ))}
+                      {renderBooks(rental.kitaplar)}
+
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleOpenConfirm(rental.id)}
+                        disabled={submittingId === rental.id}
+                        sx={{ mt: 2 }}
+                      >
+                        {submittingId === rental.id
+                          ? "Teslim Alınıyor..."
+                          : "Teslim Al"}
+                      </Button>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </Box>
           <Box
             mt={4}
@@ -384,7 +459,12 @@ const UndeliveredBooks: React.FC = () => {
       <ConfirmDialog
         open={confirmOpen}
         title="Teslim Almayı Onaylıyor Musunuz?"
-        message="Bu kitabın teslim alındığını onaylamak istiyor musunuz?"
+        message={
+          penaltyInfo
+            ? `Bu kitabın teslim alındığını onaylıyor musunuz?\n\n` +
+              `⚠️ Gecikme cezası: ${penaltyInfo.days} gün × 10 TL = ${penaltyInfo.amount} TL`
+            : "Bu kitabın teslim alındığını onaylıyor musunuz?"
+        }
         onConfirm={handleConfirm}
         onCancel={() => setConfirmOpen(false)}
       />
